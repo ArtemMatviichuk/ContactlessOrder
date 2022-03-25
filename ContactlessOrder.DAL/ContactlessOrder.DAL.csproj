@@ -6,9 +6,7 @@
 
   <ItemGroup>
     <Folder Include="EF\EntityConfigurations\" />
-    <Folder Include="Interfaces\" />
     <Folder Include="Migrations\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
   <ItemGroup>

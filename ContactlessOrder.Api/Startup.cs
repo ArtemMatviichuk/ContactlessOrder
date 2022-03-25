@@ -1,7 +1,9 @@
+using System;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using ContactlessOrder.Api.Hubs;
 using ContactlessOrder.Api.JsonConverters;
 using ContactlessOrder.Api.Middleware;
 using ContactlessOrder.Api.Validators;
@@ -15,6 +17,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -139,6 +142,13 @@ namespace ContactlessOrder.Api
                     }))
                 .CreateLogger();
 
+            services.AddSingleton<IUserIdProvider, UserIdProvider>();
+            services.AddSignalR(opt =>
+            {
+                opt.ClientTimeoutInterval = TimeSpan.FromMinutes(2);
+                opt.KeepAliveInterval = TimeSpan.FromMinutes(1);
+            });
+
             services.AddMemoryCache();
         }
 
@@ -171,6 +181,11 @@ namespace ContactlessOrder.Api
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseEndpoints(c =>
+            {
+                c.MapControllers();
+            });
         }
     }
 }

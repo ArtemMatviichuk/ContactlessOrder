@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using ContactlessOrder.BLL.Interfaces;
-using ContactlessOrder.Common.Dto.Users;
-using ContactlessOrder.DAL.Entities.User;
+using ContactlessOrder.Common.Dto.Auth;
+using ContactlessOrder.DAL.Entities.Users;
 using ContactlessOrder.DAL.Interfaces;
 using System;
 using System.Collections.Generic;

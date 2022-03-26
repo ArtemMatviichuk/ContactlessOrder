@@ -1,5 +1,5 @@
 ﻿using ContactlessOrder.BLL.Interfaces;
-using ContactlessOrder.Common.Dto.Users;
+using ContactlessOrder.Common.Dto.Auth;
 using FluentValidation;
 
 namespace ContactlessOrder.Api.Validators

@@ -1,4 +1,4 @@
-﻿namespace ContactlessOrder.Common.Dto.Users
+﻿namespace ContactlessOrder.Common.Dto.Auth
 {
     public class UserLoginRequestDto
     {

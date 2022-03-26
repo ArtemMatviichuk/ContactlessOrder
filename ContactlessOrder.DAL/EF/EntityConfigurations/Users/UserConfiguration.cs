@@ -1,14 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ContactlessOrder.DAL.Entities.Users;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ContactlessOrder.DAL.EF.EntityConfigurations.User
+namespace ContactlessOrder.DAL.EF.EntityConfigurations.Users
 {
-    public class UserConfiguration : IEntityTypeConfiguration<Entities.User.User>
+    public class UserConfiguration : IEntityTypeConfiguration<User>
     {
-        public void Configure(EntityTypeBuilder<Entities.User.User> builder)
+        public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("Users");
 
@@ -28,7 +29,7 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.User
             builder.Property(e => e.ExpireDate)
                 .HasConversion(d => d, d => DateTime.SpecifyKind(d.Value, DateTimeKind.Utc));
 
-            builder.HasData(new Entities.User.User()
+            builder.HasData(new User()
             {
                 Id = -1,
                 FirstName = "ContactlessOrder",

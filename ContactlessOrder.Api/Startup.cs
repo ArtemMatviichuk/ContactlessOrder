@@ -13,7 +13,7 @@ using ContactlessOrder.BLL.Infrastructure.MappingProfiles;
 using ContactlessOrder.BLL.Interfaces;
 using ContactlessOrder.BLL.Services;
 using ContactlessOrder.Common.Constants;
-using ContactlessOrder.Common.Dto.Users;
+using ContactlessOrder.Common.Dto.Auth;
 using ContactlessOrder.DAL.EF;
 using ContactlessOrder.DAL.Interfaces;
 using ContactlessOrder.DAL.Repositories;

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using ContactlessOrder.Common.Dto.Users;
-using ContactlessOrder.DAL.Entities.User;
+using ContactlessOrder.Common.Dto.Auth;
+using ContactlessOrder.DAL.Entities.Users;
 
 namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
 {

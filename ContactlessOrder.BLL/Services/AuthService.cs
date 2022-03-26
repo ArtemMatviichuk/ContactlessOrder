@@ -14,7 +14,6 @@ using ContactlessOrder.DAL.Entities.User;
 using ContactlessOrder.DAL.Interfaces;
 using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ContactlessOrder.BLL.Services
@@ -25,13 +24,15 @@ namespace ContactlessOrder.BLL.Services
         private readonly string _googleClientId;
         private readonly IUserRepository _repository;
         private readonly IMapper _mapper;
+        private readonly EmailHelper _emailHelper;
 
-        public AuthService(IUserRepository repository, IConfiguration configuration, IMapper mapper)
+        public AuthService(IUserRepository repository, IConfiguration configuration, IMapper mapper, EmailHelper emailHelper)
         {
             _secret = configuration["AppSettings:Secret"];
             _googleClientId = configuration["GoogleAuthSettings:clientId"];
             _repository = repository;
             _mapper = mapper;
+            _emailHelper = emailHelper;
         }
 
         public async Task<ResponseDto<string>> Authenticate(UserLoginRequestDto dto)
@@ -41,11 +42,15 @@ namespace ContactlessOrder.BLL.Services
 
             if (user == null)
             {
-                return new ResponseDto<string>() { ErrorMessage = "User not found" };
+                return new ResponseDto<string>() { ErrorMessage = "Користувач не знайдений" };
             }
             else if (user.PasswordHash != passwordHash)
             {
-                return new ResponseDto<string>() { ErrorMessage = "Password is incorrect" };
+                return new ResponseDto<string>() { ErrorMessage = "Невірний пароль" };
+            }
+            else if (!user.EmailConfirmed)
+            {
+                return new ResponseDto<string>() { ErrorMessage = "Перевірте скриньку електронної пошти для підтвердження адреси" };
             }
 
             return new ResponseDto<string>() { Response = GenerateToken(user) };
@@ -70,6 +75,7 @@ namespace ContactlessOrder.BLL.Services
                         Email = payload.Email,
                         FirstName = payload.GivenName,
                         LastName = payload.FamilyName,
+                        PasswordHash = "",
                         PhoneNumber = dto.PhoneNumber,
                         ProfilePhotoPath = payload.Picture,
                         RegistrationDate = DateTime.Now,
@@ -84,7 +90,7 @@ namespace ContactlessOrder.BLL.Services
             }
             catch (Exception)
             {
-                return new ResponseDto<string>() { ErrorMessage = "Invalid External Authentication." };
+                return new ResponseDto<string>() { ErrorMessage = "Невірна спроба зовнішньої автентифікації" };
             }
         }
 
@@ -101,22 +107,25 @@ namespace ContactlessOrder.BLL.Services
             user.EmailConfirmed = false;
             user.PasswordHash = CryptoHelper.GetMd5Hash(dto.Password);
 
-            //send email with link and token
+            await _repository.Add(user);
+            await _repository.SaveChanges();
 
-            return new ResponseDto<string>() { Response = "Confirmation message was send to your email" };
+            await _emailHelper.SendConfirmEmail(user.Email, $"{user.FirstName} {user.LastName}", GenerateToken(user));
+
+            return new ResponseDto<string>() { Response = "Посилання для підтвердження електронної пошти надіслано на вашу поштову адресу" };
         }
 
         public async Task<string> ValidateEmail(string email, int? id = null)
         {
             if (string.IsNullOrWhiteSpace(email))
             {
-                return "Email can not be empty";
+                return "Електронна пошта не може бути пустою";
             }
 
             var user = await _repository.Get<User>(e => e.Id != id && e.Email == email);
             if (user != null)
             {
-                return "Email is already in use";
+                return "Електронна пошта вже використовується";
             }
 
             return string.Empty;
@@ -126,14 +135,33 @@ namespace ContactlessOrder.BLL.Services
         {
             if (string.IsNullOrWhiteSpace(phoneNumber))
             {
-                return "Phone number can not be empty";
+                return "Телефонний номер не може бути пустою";
             }
 
             var user = await _repository.Get<User>(e => e.Id != id && e.PhoneNumber == phoneNumber);
             if (user != null)
             {
-                return "Phone number is already in use";
+                return "Телефонний номер вже використовується";
             }
+
+            return string.Empty;
+        }
+
+        public async Task<string> ConfirmEmail(int userId)
+        {
+            var user = await _repository.Get<User>(userId);
+
+            if (user == null)
+            {
+                return "Користувач не знайдений";
+            }
+            else if (user.EmailConfirmed)
+            {
+                return "Електронна адреса вже підтвердженна";
+            }
+
+            user.EmailConfirmed = true;
+            await _repository.SaveChanges();
 
             return string.Empty;
         }
@@ -148,7 +176,6 @@ namespace ContactlessOrder.BLL.Services
                 new Claim(TokenProperties.Id, user.Id.ToString()),
                 new Claim(TokenProperties.Email, user.Email),
                 new Claim(TokenProperties.FullName, $"{user.FirstName} {user.LastName}"),
-                new Claim(TokenProperties.EmailConfirmed, user.EmailConfirmed.ToString()),
             };
 
             var tokenDescription = new SecurityTokenDescriptor

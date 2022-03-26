@@ -11,5 +11,6 @@ namespace ContactlessOrder.BLL.Interfaces
         Task<ResponseDto<string>> Authenticate(UserLoginRequestDto dto);
         Task<string> ValidateEmail(string email, int? id = null);
         Task<string> ValidatePhoneNumber(string phoneNumber, int? id = null);
+        Task<string> ConfirmEmail(int userId);
     }
 }

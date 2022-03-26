@@ -63,6 +63,8 @@ namespace ContactlessOrder.Api
 
             services.AddTransient<IUserRepository, UserRepository>();
 
+            services.AddTransient<EmailHelper>();
+
             services.AddAutoMapper(typeof(Startup), typeof(UserMappingProfile));
 
             services.AddTransient<IValidator<UserDto>, UserValidation>();
@@ -123,17 +125,9 @@ namespace ContactlessOrder.Api
 
                             if (!string.IsNullOrEmpty(accessToken))
                             {
-                                var confirmed = context.Principal.FindFirstValue(TokenProperties.EmailConfirmed);
-
-                                if (confirmed != "true")
-                                {
-                                    return Task.FromException(new Exception("Check email to confirm your adress"));
-                                }
-
                                 context.Token = accessToken;
                             }
                             
-
                             return Task.CompletedTask;
                         }
                     };

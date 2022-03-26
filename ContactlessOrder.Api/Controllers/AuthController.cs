@@ -1,7 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
 using ContactlessOrder.BLL.Interfaces;
+using ContactlessOrder.Common.Constants;
 using ContactlessOrder.Common.Dto.Common;
 using ContactlessOrder.Common.Dto.Users;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HE.Material.Api.Controllers
@@ -24,7 +27,7 @@ namespace HE.Material.Api.Controllers
 
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {
-                return Ok(new { message = response.ErrorMessage });
+                return BadRequest(new { message = response.ErrorMessage });
             }
 
             return Ok(new { Token = response.Response });
@@ -37,7 +40,7 @@ namespace HE.Material.Api.Controllers
 
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {
-                return Ok(new { message = response.ErrorMessage });
+                return BadRequest(new { message = response.ErrorMessage });
             }
 
             return Ok(new { Token = response.Response });
@@ -50,10 +53,10 @@ namespace HE.Material.Api.Controllers
 
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {
-                return Ok(new { message = response.ErrorMessage });
+                return BadRequest(new { message = response.ErrorMessage });
             }
 
-            return Ok(new { Token = response.Response });
+            return Ok(new { message = response.Response });
         }
 
         [HttpPost("ValidateEmail")]
@@ -68,6 +71,21 @@ namespace HE.Material.Api.Controllers
         public async Task<IActionResult> ValidatePhoneNumber(ValidateValueDto dto)
         {
             var message = await _authService.ValidatePhoneNumber(dto.Value, dto.Id);
+
+            return Ok(new { message });
+        }
+
+        [Authorize]
+        [HttpPost("ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail()
+        {
+            var userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            var message = await _authService.ConfirmEmail(userId);
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                return BadRequest(new { message });
+            }
 
             return Ok(new { message });
         }

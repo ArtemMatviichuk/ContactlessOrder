@@ -9,12 +9,11 @@ namespace ContactlessOrder.Api.Validators
         public UserValidation(IUserService userService)
         {
             ValidatorOptions.Global.CascadeMode = CascadeMode.Stop;
-            RuleFor(x => x.Username)
+            RuleFor(x => x.Email)
+              .EmailAddress().NotEmpty().NotNull()
               .MustAsync(async (x, c, f) => await userService.GetUser(c) == null)
-              .When(u => !string.IsNullOrWhiteSpace(u.Username))
+              .When(u => !string.IsNullOrWhiteSpace(u.Email))
               .WithMessage("User already exists");
-
-            RuleFor(x => x.Email).EmailAddress().NotEmpty().NotNull();
         }
     }
 }

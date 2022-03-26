@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using ContactlessOrder.BLL.Infrastructure;
 using ContactlessOrder.BLL.Interfaces;
 using ContactlessOrder.Common.Constants;
@@ -11,6 +12,7 @@ using ContactlessOrder.Common.Dto.Common;
 using ContactlessOrder.Common.Dto.Users;
 using ContactlessOrder.DAL.Entities.User;
 using ContactlessOrder.DAL.Interfaces;
+using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -20,14 +22,16 @@ namespace ContactlessOrder.BLL.Services
     public class AuthService : IAuthService
     {
         private readonly string _secret;
+        private readonly string _googleClientId;
         private readonly IUserRepository _repository;
-        private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
 
-        public AuthService(IOptions<AppSettings> appSettings, IUserRepository repository, IConfiguration configuration)
+        public AuthService(IUserRepository repository, IConfiguration configuration, IMapper mapper)
         {
             _secret = configuration["AppSettings:Secret"];
+            _googleClientId = configuration["GoogleAuthSettings:clientId"];
             _repository = repository;
-            _configuration = configuration;
+            _mapper = mapper;
         }
 
         public async Task<ResponseDto<string>> Authenticate(UserLoginRequestDto dto)
@@ -39,11 +43,103 @@ namespace ContactlessOrder.BLL.Services
             {
                 return new ResponseDto<string>() { ErrorMessage = "User not found" };
             }
-            else if (user.Password != passwordHash)
+            else if (user.PasswordHash != passwordHash)
             {
                 return new ResponseDto<string>() { ErrorMessage = "Password is incorrect" };
             }
 
+            return new ResponseDto<string>() { Response = GenerateToken(user) };
+        }
+
+        public async Task<ResponseDto<string>> GoogleLogin(GoogleRegisterRequestDto dto)
+        {
+            try
+            {
+                var settings = new GoogleJsonWebSignature.ValidationSettings()
+                {
+                    Audience = new List<string>() { _googleClientId }
+                };
+                var payload = await GoogleJsonWebSignature.ValidateAsync(dto.IdToken, settings);
+
+                var user = await _repository.Get<User>(e => e.Email == payload.Email);
+
+                if (user == null)
+                {
+                    user = new User()
+                    {
+                        Email = payload.Email,
+                        FirstName = payload.GivenName,
+                        LastName = payload.FamilyName,
+                        PhoneNumber = dto.PhoneNumber,
+                        ProfilePhotoPath = payload.Picture,
+                        RegistrationDate = DateTime.Now,
+                        EmailConfirmed = true,
+                    };
+
+                    await _repository.Add(user);
+                    await _repository.SaveChanges();
+                }
+
+                return new ResponseDto<string>() { Response = GenerateToken(user) };
+            }
+            catch (Exception)
+            {
+                return new ResponseDto<string>() { ErrorMessage = "Invalid External Authentication." };
+            }
+        }
+
+        public async Task<ResponseDto<string>> Register(UserRegisterRequestDto dto)
+        {
+            var error = await ValidateUser(dto);
+            if (!string.IsNullOrEmpty(error))
+            {
+                return new ResponseDto<string>() { ErrorMessage = error };
+            }
+
+            var user = _mapper.Map<User>(dto);
+            user.RegistrationDate = DateTime.Now;
+            user.EmailConfirmed = false;
+            user.PasswordHash = CryptoHelper.GetMd5Hash(dto.Password);
+
+            //send email with link and token
+
+            return new ResponseDto<string>() { Response = "Confirmation message was send to your email" };
+        }
+
+        public async Task<string> ValidateEmail(string email, int? id = null)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return "Email can not be empty";
+            }
+
+            var user = await _repository.Get<User>(e => e.Id != id && e.Email == email);
+            if (user != null)
+            {
+                return "Email is already in use";
+            }
+
+            return string.Empty;
+        }
+
+        public async Task<string> ValidatePhoneNumber(string phoneNumber, int? id = null)
+        {
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                return "Phone number can not be empty";
+            }
+
+            var user = await _repository.Get<User>(e => e.Id != id && e.PhoneNumber == phoneNumber);
+            if (user != null)
+            {
+                return "Phone number is already in use";
+            }
+
+            return string.Empty;
+        }
+
+        private string GenerateToken(User user)
+        {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_secret);
 
@@ -52,6 +148,7 @@ namespace ContactlessOrder.BLL.Services
                 new Claim(TokenProperties.Id, user.Id.ToString()),
                 new Claim(TokenProperties.Email, user.Email),
                 new Claim(TokenProperties.FullName, $"{user.FirstName} {user.LastName}"),
+                new Claim(TokenProperties.EmailConfirmed, user.EmailConfirmed.ToString()),
             };
 
             var tokenDescription = new SecurityTokenDescriptor
@@ -63,12 +160,26 @@ namespace ContactlessOrder.BLL.Services
             };
 
             var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescription));
-            return new ResponseDto<string>() { Response = token };
+            return token;
         }
 
-        public Task<ResponseDto<string>> Register(UserRegisterRequestDto dto)
+        private async Task<string> ValidateUser(UserRegisterRequestDto dto)
         {
-            throw new NotImplementedException();
+            var error = await ValidateEmail(dto.Email);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                return error;
+            }
+
+            error = await ValidatePhoneNumber(dto.PhoneNumber);
+
+            if (!string.IsNullOrEmpty(error))
+            {
+                return error;
+            }
+
+            return string.Empty;
         }
     }
 }

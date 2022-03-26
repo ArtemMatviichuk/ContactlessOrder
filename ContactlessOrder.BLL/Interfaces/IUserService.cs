@@ -5,6 +5,6 @@ namespace ContactlessOrder.BLL.Interfaces
 {
     public interface IUserService
     {
-        Task<UserDto> GetUser(string username);
+        Task<UserDto> GetUser(string email);
     }
 }

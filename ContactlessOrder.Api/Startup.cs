@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using ContactlessOrder.Api.Hubs;
@@ -8,9 +9,14 @@ using ContactlessOrder.Api.JsonConverters;
 using ContactlessOrder.Api.Middleware;
 using ContactlessOrder.Api.Validators;
 using ContactlessOrder.BLL.Infrastructure;
+using ContactlessOrder.BLL.Infrastructure.MappingProfiles;
+using ContactlessOrder.BLL.Interfaces;
+using ContactlessOrder.BLL.Services;
 using ContactlessOrder.Common.Constants;
 using ContactlessOrder.Common.Dto.Users;
 using ContactlessOrder.DAL.EF;
+using ContactlessOrder.DAL.Interfaces;
+using ContactlessOrder.DAL.Repositories;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -52,9 +58,12 @@ namespace ContactlessOrder.Api
                options.UseSqlServer(Configuration.GetConnectionString("COLocal")));
 
             //configures
+            services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<IUserService, UserService>();
 
+            services.AddTransient<IUserRepository, UserRepository>();
 
-            services.AddAutoMapper(typeof(Startup));
+            services.AddAutoMapper(typeof(Startup), typeof(UserMappingProfile));
 
             services.AddTransient<IValidator<UserDto>, UserValidation>();
 
@@ -114,8 +123,16 @@ namespace ContactlessOrder.Api
 
                             if (!string.IsNullOrEmpty(accessToken))
                             {
+                                var confirmed = context.Principal.FindFirstValue(TokenProperties.EmailConfirmed);
+
+                                if (confirmed != "true")
+                                {
+                                    return Task.FromException(new Exception("Check email to confirm your adress"));
+                                }
+
                                 context.Token = accessToken;
                             }
+                            
 
                             return Task.CompletedTask;
                         }

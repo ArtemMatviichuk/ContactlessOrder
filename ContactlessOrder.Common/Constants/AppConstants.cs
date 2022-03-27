@@ -23,5 +23,7 @@
         public const string LogPath = "LogPath";
 
         public const string CorsOrigin = "CorsOrigin";
+
+        public const string FilePath = "FilePath";
     }
 }

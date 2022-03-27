@@ -14,10 +14,12 @@ namespace HE.Material.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly IValidationService _validationService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IValidationService validationService)
         {
             _authService = authService;
+            _validationService = validationService;
         }
 
         [HttpPost]
@@ -75,7 +77,7 @@ namespace HE.Material.Api.Controllers
         [HttpPost("ValidateEmail")]
         public async Task<IActionResult> ValidateEmail(ValidateValueDto dto)
         {
-            var message = await _authService.ValidateEmail(dto.Value, dto.Id);
+            var message = await _validationService.ValidateEmail(dto.Value, dto.Id);
 
             return Ok(new { message });
         }
@@ -83,7 +85,7 @@ namespace HE.Material.Api.Controllers
         [HttpPost("ValidatePhoneNumber")]
         public async Task<IActionResult> ValidatePhoneNumber(ValidateValueDto dto)
         {
-            var message = await _authService.ValidatePhoneNumber(dto.Value, dto.Id);
+            var message = await _validationService.ValidatePhoneNumber(dto.Value, dto.Id);
 
             return Ok(new { message });
         }
@@ -91,7 +93,7 @@ namespace HE.Material.Api.Controllers
         [HttpPost("ValidateCompanyName")]
         public async Task<IActionResult> ValidateCompanyName(ValidateValueDto dto)
         {
-            var message = await _authService.ValidateCompanyName(dto.Value, dto.Id);
+            var message = await _validationService.ValidateCompanyName(dto.Value, dto.Id);
 
             return Ok(new { message });
         }

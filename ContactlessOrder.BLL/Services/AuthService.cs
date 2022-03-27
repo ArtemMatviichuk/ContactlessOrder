@@ -21,19 +21,22 @@ namespace ContactlessOrder.BLL.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly string _secret;
-        private readonly string _googleClientId;
+        private readonly IValidationService _validationService;
         private readonly IUserRepository _repository;
         private readonly IMapper _mapper;
         private readonly EmailHelper _emailHelper;
+        private readonly string _secret;
+        private readonly string _googleClientId;
 
-        public AuthService(IUserRepository repository, IConfiguration configuration, IMapper mapper, EmailHelper emailHelper)
+        public AuthService(IUserRepository repository, IConfiguration configuration, IMapper mapper,
+            EmailHelper emailHelper, IValidationService validationService)
         {
             _secret = configuration["AppSettings:Secret"];
             _googleClientId = configuration["GoogleAuthSettings:clientId"];
             _repository = repository;
             _mapper = mapper;
             _emailHelper = emailHelper;
+            _validationService = validationService;
         }
 
         public async Task<ResponseDto<string>> Authenticate(UserLoginRequestDto dto)
@@ -67,7 +70,7 @@ namespace ContactlessOrder.BLL.Services
                 };
                 var payload = await GoogleJsonWebSignature.ValidateAsync(dto.IdToken, settings);
 
-                var user = await _repository.Get<User>(e => e.Email == payload.Email);
+                var user = await _repository.GetUser(payload.Email);
 
                 if (user == null)
                 {
@@ -89,7 +92,7 @@ namespace ContactlessOrder.BLL.Services
 
                 return new ResponseDto<string>() { Response = GenerateToken(user) };
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return new ResponseDto<string>() { ErrorMessage = "Невірна спроба зовнішньої автентифікації" };
             }
@@ -97,7 +100,7 @@ namespace ContactlessOrder.BLL.Services
 
         public async Task<ResponseDto<string>> Register(UserRegisterRequestDto dto)
         {
-            var error = await ValidateUser(dto);
+            var error = await _validationService.ValidateUser(dto);
             if (!string.IsNullOrEmpty(error))
             {
                 return new ResponseDto<string>() { ErrorMessage = error };
@@ -118,13 +121,11 @@ namespace ContactlessOrder.BLL.Services
 
         public async Task<ResponseDto<string>> RegisterCompany(CompanyRegisterRequestDto dto)
         {
-            var error = await ValidateCompany(dto);
+            var error = await _validationService.ValidateCompany(dto);
             if (!string.IsNullOrEmpty(error))
             {
                 return new ResponseDto<string>() { ErrorMessage = error };
             }
-
-            var dateTimeNow = DateTime.UtcNow;
 
             var user = new User()
             {
@@ -133,12 +134,11 @@ namespace ContactlessOrder.BLL.Services
                 PasswordHash = CryptoHelper.GetMd5Hash(dto.Password),
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
-                RegistrationDate = dateTimeNow,
+                RegistrationDate = DateTime.UtcNow,
                 EmailConfirmed = false,
                 Company = new Company()
                 {
                     Name = dto.Name,
-                    RegisteredDate = dateTimeNow,
                 }
             };
 
@@ -148,54 +148,6 @@ namespace ContactlessOrder.BLL.Services
             await _emailHelper.SendConfirmEmail(user.Email, dto.Name, GenerateToken(user));
 
             return new ResponseDto<string>() { Response = "Посилання для підтвердження електронної пошти надіслано на вашу поштову адресу" };
-        }
-
-        public async Task<string> ValidateEmail(string email, int? id = null)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                return "Електронна пошта не може бути пустою";
-            }
-
-            var user = await _repository.Get<User>(e => e.Id != id && e.Email == email);
-            if (user != null)
-            {
-                return "Електронна пошта вже використовується";
-            }
-
-            return string.Empty;
-        }
-
-        public async Task<string> ValidatePhoneNumber(string phoneNumber, int? id = null)
-        {
-            if (string.IsNullOrWhiteSpace(phoneNumber))
-            {
-                return "Телефонний номер не може бути пустим";
-            }
-
-            var user = await _repository.Get<User>(e => e.Id != id && e.PhoneNumber == phoneNumber);
-            if (user != null)
-            {
-                return "Телефонний номер вже використовується";
-            }
-
-            return string.Empty;
-        }
-
-        public async Task<string> ValidateCompanyName(string name, int? id = null)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return "Назва компанії не може бути пустою";
-            }
-
-            var user = await _repository.Get<Company>(e => e.Id != id && e.Name == name);
-            if (user != null)
-            {
-                return "Назва компанії вже використовується";
-            }
-
-            return string.Empty;
         }
 
         public async Task<string> ConfirmEmail(int userId)
@@ -227,6 +179,7 @@ namespace ContactlessOrder.BLL.Services
                 new Claim(TokenProperties.Id, user.Id.ToString()),
                 new Claim(TokenProperties.Email, user.Email),
                 new Claim(TokenProperties.FullName, user.Company?.Name ?? $"{user.FirstName} {user.LastName}"),
+                new Claim(TokenProperties.CompanyId, user.Company == null ? string.Empty : user.Company.Id.ToString()),
             };
 
             var tokenDescription = new SecurityTokenDescriptor
@@ -239,44 +192,6 @@ namespace ContactlessOrder.BLL.Services
 
             var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescription));
             return token;
-        }
-
-        private async Task<string> ValidateUser(UserRegisterRequestDto dto)
-        {
-            var error = await ValidateEmail(dto.Email);
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                return error;
-            }
-
-            error = await ValidatePhoneNumber(dto.PhoneNumber);
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                return error;
-            }
-
-            return string.Empty;
-        }
-
-        private async Task<string> ValidateCompany(CompanyRegisterRequestDto dto)
-        {
-            var error = await ValidateEmail(dto.Email);
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                return error;
-            }
-
-            error = await ValidateCompanyName(dto.Name);
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                return error;
-            }
-
-            return string.Empty;
         }
     }
 }

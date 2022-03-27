@@ -57,13 +57,16 @@ namespace ContactlessOrder.Api
             services.AddDbContext<ContactlessOrderContext>(options =>
                options.UseSqlServer(Configuration.GetConnectionString("COLocal")));
 
-            //configures
+            services.AddTransient<IValidationService, ValidationService>();
             services.AddTransient<IAuthService, AuthService>();
             services.AddTransient<IUserService, UserService>();
+            services.AddTransient<ICompanyService, CompanyService>();
 
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<ICompanyRepository, CompanyRepository>();
 
             services.AddTransient<EmailHelper>();
+            services.AddTransient<FileHelper>();
 
             services.AddAutoMapper(typeof(Startup), typeof(UserMappingProfile));
 

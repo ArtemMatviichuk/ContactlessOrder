@@ -38,7 +38,7 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Users
                 Email = "contactless.order@gmail.com",
                 PhoneNumber = "",
                 EmailConfirmed = true,
-                RegistrationDate = DateTime.Now,
+                RegistrationDate = new DateTime(2022, 2, 24),
             });
         }
 

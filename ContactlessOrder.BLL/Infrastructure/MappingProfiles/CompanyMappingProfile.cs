@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ContactlessOrder.Common.Dto.Caterings;
 using ContactlessOrder.Common.Dto.Companies;
 using ContactlessOrder.DAL.Entities.Companies;
 using System;
@@ -16,6 +17,9 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
                 .ForMember(e => e.PhoneNumber, opt => opt.MapFrom(e => e.User.PhoneNumber))
                 .ForMember(e => e.RegisteredDate, opt => opt.MapFrom(e => e.User.RegistrationDate))
                 .ForMember(e => e.ModifiedDate, opt => opt.MapFrom(e => e.User.ModifiedDate));
+
+            CreateMap<CreateCateringDto, Catering>();
+            CreateMap<CateringDto, CateringDto>();
         }
     }
 }

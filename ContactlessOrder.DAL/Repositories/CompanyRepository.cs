@@ -16,6 +16,14 @@ namespace ContactlessOrder.DAL.Repositories
         {
         }
 
+        public async Task<IEnumerable<Catering>> GetCaterings(int userId)
+        {
+            return await Context.Set<Catering>()
+                .Include(e => e.Company)
+                .Where(e => e.Company.UserId == userId)
+                .ToListAsync();
+        }
+
         public async Task<Company> GetCompany(int userId)
         {
             return await Context.Set<Company>()

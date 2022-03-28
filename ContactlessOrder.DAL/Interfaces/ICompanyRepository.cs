@@ -10,5 +10,6 @@ namespace ContactlessOrder.DAL.Interfaces
     public interface ICompanyRepository : IRepositoryBase
     {
         Task<Company> GetCompany(int userId);
+        Task<IEnumerable<Catering>> GetCaterings(int userId);
     }
 }

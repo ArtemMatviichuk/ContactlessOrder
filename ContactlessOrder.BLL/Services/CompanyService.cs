@@ -2,6 +2,7 @@
 using ContactlessOrder.BLL.Infrastructure;
 using ContactlessOrder.BLL.Interfaces;
 using ContactlessOrder.Common.Constants;
+using ContactlessOrder.Common.Dto.Caterings;
 using ContactlessOrder.Common.Dto.Common;
 using ContactlessOrder.Common.Dto.Companies;
 using ContactlessOrder.DAL.Entities.Companies;
@@ -93,6 +94,25 @@ namespace ContactlessOrder.BLL.Services
             await _companyRepository.SaveChanges();
 
             return string.Empty;
+        }
+
+        public async Task<IEnumerable<CateringDto>> GetCaterings(int userId)
+        {
+            var caterings = await _companyRepository.GetCaterings(userId);
+
+            var dtos = _mapper.Map<IEnumerable<CateringDto>>(caterings);
+
+            return dtos;
+        }
+
+        public async Task CreateCatering(int userId, CreateCateringDto dto)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task UpdateCatering(int id, CreateCateringDto dto)
+        {
+            throw new NotImplementedException();
         }
     }
 }

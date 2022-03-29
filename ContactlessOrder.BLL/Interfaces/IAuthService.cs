@@ -8,6 +8,7 @@ namespace ContactlessOrder.BLL.Interfaces
     {
         Task<ResponseDto<string>> Register(UserRegisterRequestDto dto);
         Task<ResponseDto<string>> RegisterCompany(CompanyRegisterRequestDto dto);
+        Task<ResponseDto<string>> AuthenticateCatering(UserLoginRequestDto dto);
         Task<ResponseDto<string>> GoogleLogin(GoogleRegisterRequestDto dto);
         Task<ResponseDto<string>> Authenticate(UserLoginRequestDto dto);
         Task<string> ConfirmEmail(int userId);

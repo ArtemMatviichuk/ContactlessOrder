@@ -92,10 +92,27 @@ namespace ContactlessOrder.BLL.Services
 
                 return new ResponseDto<string>() { Response = GenerateToken(user) };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new ResponseDto<string>() { ErrorMessage = "Невірна спроба зовнішньої автентифікації" };
             }
+        }
+
+        public async Task<ResponseDto<string>> AuthenticateCatering(UserLoginRequestDto dto)
+        {
+            var passwordHash = CryptoHelper.GetMd5Hash(dto.Password);
+            var catering = await _repository.Get<Catering>(e => e.Login == dto.Email);
+
+            if (catering == null)
+            {
+                return new ResponseDto<string>() { ErrorMessage = "Користувач не знайдений" };
+            }
+            else if (catering.PasswordHash != passwordHash)
+            {
+                return new ResponseDto<string>() { ErrorMessage = "Невірний пароль" };
+            }
+
+            return new ResponseDto<string>() { Response = GenerateToken(catering) };
         }
 
         public async Task<ResponseDto<string>> Register(UserRegisterRequestDto dto)
@@ -180,6 +197,31 @@ namespace ContactlessOrder.BLL.Services
                 new Claim(TokenProperties.Email, user.Email),
                 new Claim(TokenProperties.FullName, user.Company?.Name ?? $"{user.FirstName} {user.LastName}"),
                 new Claim(TokenProperties.CompanyId, user.Company == null ? string.Empty : user.Company.Id.ToString()),
+            };
+
+            var tokenDescription = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddDays(10),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),
+                     SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescription));
+            return token;
+        }
+
+        private string GenerateToken(Catering catering)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_secret);
+
+            var claims = new List<Claim>
+            {
+                new Claim(TokenProperties.Id, catering.Id.ToString()),
+                new Claim(TokenProperties.Email, catering.Login),
+                new Claim(TokenProperties.FullName, catering.Name),
+                new Claim(TokenProperties.Catering, true.ToString()),
             };
 
             var tokenDescription = new SecurityTokenDescriptor

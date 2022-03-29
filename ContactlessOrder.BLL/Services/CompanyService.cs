@@ -2,6 +2,7 @@
 using ContactlessOrder.BLL.Infrastructure;
 using ContactlessOrder.BLL.Interfaces;
 using ContactlessOrder.Common.Constants;
+using ContactlessOrder.Common.Dto.Auth;
 using ContactlessOrder.Common.Dto.Caterings;
 using ContactlessOrder.Common.Dto.Common;
 using ContactlessOrder.Common.Dto.Companies;
@@ -105,14 +106,65 @@ namespace ContactlessOrder.BLL.Services
             return dtos;
         }
 
-        public async Task CreateCatering(int userId, CreateCateringDto dto)
+        public async Task<UserLoginRequestDto> CreateCatering(int userId, CreateCateringDto dto)
         {
-            throw new NotImplementedException();
+            var company = await _companyRepository.GetCompany(userId);
+
+            if (company != null)
+            {
+                var catering = _mapper.Map<Catering>(dto);
+                catering.CompanyId = company.Id;
+
+                var password = CryptoHelper.GeneratePassword(16);
+                catering.Login = $"{company.Name}.{catering.Name}".ToLower().Replace(" ", "_");
+                catering.PasswordHash = CryptoHelper.GetMd5Hash(password);
+
+                await _companyRepository.Add(catering);
+                await _companyRepository.SaveChanges();
+
+                return new UserLoginRequestDto()
+                {
+                    Email = catering.Login,
+                    Password = password,
+                };
+            }
+
+            return null;
         }
 
         public async Task UpdateCatering(int id, CreateCateringDto dto)
         {
-            throw new NotImplementedException();
+            var catering = await _companyRepository.Get<Catering>(id);
+
+            if (catering != null)
+            {
+                _mapper.Map(dto, catering);
+
+                await _companyRepository.SaveChanges();
+            }
+        }
+
+        public async Task DeleteCatering(int id)
+        {
+            await _companyRepository.Remove<Catering>(id);
+            await _companyRepository.SaveChanges();
+        }
+
+        public async Task<string> RegenerateCateringPassword(int id)
+        {
+            var catering = await _companyRepository.Get<Catering>(id);
+
+            if (catering != null)
+            {
+                var password = CryptoHelper.GeneratePassword(16);
+                catering.PasswordHash = CryptoHelper.GetMd5Hash(password);
+
+                await _companyRepository.SaveChanges();
+
+                return password;
+            }
+
+            return string.Empty;
         }
     }
 }

@@ -1,10 +1,14 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace ContactlessOrder.BLL.Infrastructure
 {
     public class CryptoHelper
     {
+        private static Random random = new Random();
+
         public static string GetMd5Hash(string input)
         {
             var md5Hash = MD5.Create();
@@ -17,6 +21,13 @@ namespace ContactlessOrder.BLL.Infrastructure
             }
 
             return sBuilder.ToString();
+        }
+
+        public static string GeneratePassword(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }

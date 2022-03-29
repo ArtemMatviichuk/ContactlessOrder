@@ -71,12 +71,17 @@ namespace ContactlessOrder.Api.Controllers
         }
 
         [HttpPost("Caterings")]
-        public async Task<IActionResult> CreateCatering([FromForm] CreateCateringDto dto)
+        public async Task<IActionResult> CreateCatering(CreateCateringDto dto)
         {
             int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
-            await _companyService.CreateCatering(userId, dto);
+            var response = await _companyService.CreateCatering(userId, dto);
 
-            return Ok();
+            if (response == null)
+            {
+                return BadRequest("Точка не знайдена");
+            }
+
+            return Ok(response);
         }
 
         [HttpPut("Caterings/{id}")]
@@ -85,6 +90,27 @@ namespace ContactlessOrder.Api.Controllers
             await _companyService.UpdateCatering(id, dto);
 
             return Ok();
+        }
+
+        [HttpDelete("Caterings/{id}")]
+        public async Task<IActionResult> DeleteCatering(int id)
+        {
+            await _companyService.DeleteCatering(id);
+
+            return Ok();
+        }
+
+        [HttpPut("Caterings/{id}/RegeneratePassword")]
+        public async Task<IActionResult> RegenerateCateringPassword(int id)
+        {
+            var message = await _companyService.RegenerateCateringPassword(id);
+
+            if (string.IsNullOrEmpty(message))
+            {
+                return BadRequest("Точка не знайдена");
+            }
+
+            return Ok(new { password = message });
         }
     }
 }

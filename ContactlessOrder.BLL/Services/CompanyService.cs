@@ -9,6 +9,7 @@ using ContactlessOrder.Common.Dto.Companies;
 using ContactlessOrder.DAL.Entities.Companies;
 using ContactlessOrder.DAL.Entities.Users;
 using ContactlessOrder.DAL.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -134,7 +135,7 @@ namespace ContactlessOrder.BLL.Services
 
         public async Task UpdateCatering(int id, CreateCateringDto dto)
         {
-            var catering = await _companyRepository.Get<Catering>(id);
+            var catering = await _companyRepository.GetCatering(id);
 
             if (catering != null)
             {
@@ -165,6 +166,119 @@ namespace ContactlessOrder.BLL.Services
             }
 
             return string.Empty;
+        }
+
+        public async Task<IEnumerable<MenuItemDto>> GetMenu(int userId)
+        {
+            var menu = await _companyRepository.GetMenuItems(userId);
+
+            var dtos = _mapper.Map<IEnumerable<MenuItemDto>>(menu);
+
+            return dtos;
+        }
+
+        public async Task CreateMenuItem(int userId, CreateMenuItemDto dto)
+        {
+            var company = await _companyRepository.GetCompany(userId);
+
+            if (company != null)
+            {
+                var menuItem = _mapper.Map<MenuItem>(dto);
+                menuItem.CompanyId = company.Id;
+
+                if (dto.Pictures != null && dto.Pictures.Any())
+                {
+                    menuItem.Pictures = await SavePictures(dto.Pictures);
+                }
+
+                await _companyRepository.Add(menuItem);
+                await _companyRepository.SaveChanges();
+            }
+        }
+
+        public async Task UpdateMenuItem(int id, UpdateMenuItemDto dto)
+        {
+            var menuItem = await _companyRepository.Get<MenuItem>(id);
+
+            if (menuItem != null)
+            {
+                _mapper.Map(dto, menuItem);
+
+                if (dto.Pictures != null && dto.Pictures.Any())
+                {
+                    menuItem.Pictures = await SavePictures(dto.Pictures);
+                }
+
+                if (dto.DeletedPictureIds != null && dto.DeletedPictureIds.Any())
+                {
+                    var pictures = await _companyRepository.GetAllAsTracking<MenuItemPicture>(p =>
+                            dto.DeletedPictureIds.Contains(p.Id));
+
+                    _companyRepository.RemoveRange(pictures);
+                }
+
+                await RemoveOptions(id, dto.Options);
+
+                await _companyRepository.SaveChanges();
+            }
+        }
+
+        public async Task DeleteMenuItem(int id)
+        {
+            await _companyRepository.Remove<MenuItem>(id);
+            await _companyRepository.SaveChanges();
+        }
+
+        public async Task<IEnumerable<AttachmentDto>> GetMenuItemPictures(int id)
+        {
+            var pictures = await _companyRepository.GetAll<MenuItemPicture>(p => p.MenuItemId == id);
+
+            var dtos = _mapper.Map<IEnumerable<AttachmentDto>>(pictures);
+
+            return dtos;
+        }
+
+        public async Task<FileDto> GetMenuItemPictureFile(int id)
+        {
+            var attachment = await _companyRepository.Get<MenuItemPicture>(id);
+            if (attachment == null)
+            {
+                return null;
+            }
+
+            return await _fileHelper.GetFile(attachment.FileName, _configuration[AppConstants.FilePath]);
+        }
+
+        private async Task<List<MenuItemPicture>> SavePictures(IEnumerable<IFormFile> files)
+        {
+            var pictures = new List<MenuItemPicture>();
+            foreach (var picture in files)
+            {
+                var fileName = await _fileHelper.SaveFile(picture, _configuration[AppConstants.FilePath]);
+
+                pictures.Add(new MenuItemPicture()
+                {
+                    FileName = fileName,
+                    CreatedDate = DateTime.UtcNow,
+                });
+            }
+
+            return pictures;
+        }
+
+        private async Task RemoveOptions(int menuId, IEnumerable<MenuItemOptionDto> dtos)
+        {
+            if (dtos != null && dtos.Any())
+            {
+                var toDelete = await _companyRepository.GetAllAsTracking<MenuItemOption>(e => e.MenuItemId == menuId && !dtos.Select(o => o.Id).Contains(e.Id));
+
+                _companyRepository.RemoveRange(toDelete);
+            }
+            else
+            {
+                var options = await _companyRepository.GetAll<MenuItemOption>(e => e.MenuItemId == menuId);
+                _companyRepository.RemoveRange(options);
+            }
         }
     }
 }

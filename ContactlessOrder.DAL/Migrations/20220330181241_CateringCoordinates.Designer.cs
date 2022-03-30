@@ -4,14 +4,16 @@ using ContactlessOrder.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ContactlessOrder.DAL.Migrations
 {
     [DbContext(typeof(ContactlessOrderContext))]
-    partial class ContactlessOrderContextModelSnapshot : ModelSnapshot
+    [Migration("20220330181241_CateringCoordinates")]
+    partial class CateringCoordinates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,77 +122,6 @@ namespace ContactlessOrder.DAL.Migrations
                     b.ToTable("Coordinates");
                 });
 
-            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.MenuItem", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("CompanyId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CompanyId");
-
-                    b.ToTable("Menu");
-                });
-
-            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.MenuItemOption", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("MenuItemId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MenuItemId");
-
-                    b.ToTable("MenuOptions");
-                });
-
-            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.MenuItemPicture", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FileName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MenuItemId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MenuItemId");
-
-                    b.ToTable("MenuPictures");
-                });
-
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Users.User", b =>
                 {
                     b.Property<int>("Id")
@@ -285,39 +216,6 @@ namespace ContactlessOrder.DAL.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.MenuItem", b =>
-                {
-                    b.HasOne("ContactlessOrder.DAL.Entities.Companies.Company", "Company")
-                        .WithMany()
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.MenuItemOption", b =>
-                {
-                    b.HasOne("ContactlessOrder.DAL.Entities.Companies.MenuItem", "MenuItem")
-                        .WithMany("Options")
-                        .HasForeignKey("MenuItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MenuItem");
-                });
-
-            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.MenuItemPicture", b =>
-                {
-                    b.HasOne("ContactlessOrder.DAL.Entities.Companies.MenuItem", "MenuItem")
-                        .WithMany("Pictures")
-                        .HasForeignKey("MenuItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MenuItem");
-                });
-
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.Company", b =>
                 {
                     b.Navigation("Caterings");
@@ -326,13 +224,6 @@ namespace ContactlessOrder.DAL.Migrations
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.Coordinate", b =>
                 {
                     b.Navigation("Catering");
-                });
-
-            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.MenuItem", b =>
-                {
-                    b.Navigation("Options");
-
-                    b.Navigation("Pictures");
                 });
 
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Users.User", b =>

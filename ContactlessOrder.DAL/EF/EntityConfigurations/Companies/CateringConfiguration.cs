@@ -12,7 +12,6 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Companies
             builder.ToTable("Caterings");
 
             builder.Property(e => e.Name).IsRequired().HasMaxLength(250);
-            builder.Property(e => e.Coordinates).IsRequired().HasMaxLength(100);
 
             builder.Property(e => e.RegisteredDate)
                 .HasConversion(d => d, d => DateTime.SpecifyKind(d, DateTimeKind.Utc));
@@ -24,6 +23,8 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Companies
                 .WithMany(e => e.Caterings)
                 .HasForeignKey(e => e.CompanyId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(e => e.Coordinates).WithOne(e => e.Catering);
         }
     }
 }

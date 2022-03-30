@@ -1,15 +1,15 @@
 ﻿using AutoMapper;
 using ContactlessOrder.Common.Dto.Caterings;
+using ContactlessOrder.Common.Dto.Common;
 using ContactlessOrder.Common.Dto.Companies;
 using ContactlessOrder.DAL.Entities.Companies;
 using System;
+using System.Linq;
 
 namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
 {
     public class CompanyMappingProfile : Profile
     {
-
-        public DateTime RegisteredDate { get; set; }
         public CompanyMappingProfile()
         {
             CreateMap<Company, CompanyDto>()
@@ -18,12 +18,27 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
                 .ForMember(e => e.RegisteredDate, opt => opt.MapFrom(e => e.User.RegistrationDate))
                 .ForMember(e => e.ModifiedDate, opt => opt.MapFrom(e => e.User.ModifiedDate));
 
+            CreateMap<Coordinate, CoordinateDto>().ReverseMap();
+
             CreateMap<CreateCateringDto, Catering>()
                 .ForMember(e => e.OpenTime, opt => opt.MapFrom(e => MapToTimeSpan(e.OpenTime)))
                 .ForMember(e => e.CloseTime, opt => opt.MapFrom(e => MapToTimeSpan(e.CloseTime)));
             CreateMap<Catering, CateringDto>()
                 .ForMember(e => e.OpenTime, opt => opt.MapFrom(e => MapToTimeDto(e.OpenTime)))
                 .ForMember(e => e.CloseTime, opt => opt.MapFrom(e => MapToTimeDto(e.CloseTime)));
+
+
+            CreateMap<MenuItemPicture, AttachmentDto>();
+            CreateMap<MenuItemOption, MenuItemOptionDto>().ReverseMap();
+
+            CreateMap<CreateMenuItemDto, MenuItem>()
+                .ForMember(e => e.Pictures, opt => opt.Ignore());
+
+            CreateMap<UpdateMenuItemDto, MenuItem>()
+                .ForMember(e => e.Pictures, opt => opt.Ignore());
+
+            CreateMap<MenuItem, MenuItemDto>()
+                .ForMember(e => e.FirstPictureId, opt => opt.MapFrom(e => e.Pictures.FirstOrDefault().Id));
         }
 
         private static TimeSpan? MapToTimeSpan(TimeDto dto)

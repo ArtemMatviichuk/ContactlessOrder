@@ -19,5 +19,12 @@ namespace ContactlessOrder.BLL.Interfaces
         Task UpdateCatering(int id, CreateCateringDto dto);
         Task DeleteCatering(int id);
         Task<string> RegenerateCateringPassword(int id);
+
+        Task<IEnumerable<MenuItemDto>> GetMenu(int userId);
+        Task CreateMenuItem(int userId, CreateMenuItemDto dto);
+        Task UpdateMenuItem(int id, UpdateMenuItemDto dto);
+        Task DeleteMenuItem(int id);
+        Task<IEnumerable<AttachmentDto>> GetMenuItemPictures(int id);
+        Task<FileDto> GetMenuItemPictureFile(int id);
     }
 }

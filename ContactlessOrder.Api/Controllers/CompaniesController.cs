@@ -112,5 +112,61 @@ namespace ContactlessOrder.Api.Controllers
 
             return Ok(new { password = message });
         }
+
+        [HttpGet("Menu")]
+        public async Task<IActionResult> GetMenu()
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            var menu = await _companyService.GetMenu(userId);
+
+            return Ok(menu);
+        }
+
+        [HttpPost("Menu")]
+        public async Task<IActionResult> CreateMenu([FromForm] CreateMenuItemDto dto)
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            await _companyService.CreateMenuItem(userId, dto);
+
+            return Ok();
+        }
+
+        [HttpPut("Menu/{id}")]
+        public async Task<IActionResult> UpdateMenu(int id, [FromForm] UpdateMenuItemDto dto)
+        {
+            await _companyService.UpdateMenuItem(id, dto);
+
+            return Ok();
+        }
+
+        [HttpDelete("Menu/{id}")]
+        public async Task<IActionResult> DeleteMenu(int id)
+        {
+            await _companyService.DeleteMenuItem(id);
+
+            return Ok();
+        }
+
+        [HttpGet("Menu/{id}/Pictures")]
+        public async Task<IActionResult> GetToolPictures(int id)
+        {
+            var images = await _companyService.GetMenuItemPictures(id);
+
+            return Ok(images);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("Menu/Pictures/{id}/File")]
+        public async Task<IActionResult> GetPictureFile(int id)
+        {
+            var file = await _companyService.GetMenuItemPictureFile(id);
+
+            if (file == null)
+            {
+                return NotFound(new { message = "File not found." });
+            }
+
+            return File(file.Bytes, file.ContentType, file.FileName);
+        }
     }
 }

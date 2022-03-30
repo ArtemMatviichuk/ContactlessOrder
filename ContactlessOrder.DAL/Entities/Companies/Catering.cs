@@ -6,7 +6,7 @@ namespace ContactlessOrder.DAL.Entities.Companies
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Coordinates { get; set; }
+        public string Services { get; set; }
         public bool FullDay { get; set; }
         public TimeSpan? OpenTime { get; set; }
         public TimeSpan? CloseTime { get; set; }
@@ -19,5 +19,7 @@ namespace ContactlessOrder.DAL.Entities.Companies
 
         public int CompanyId { get; set; }
         public Company Company { get; set; }
+        public int? CoordinatesId { get; set; }
+        public Coordinate Coordinates { get; set; }
     }
 }

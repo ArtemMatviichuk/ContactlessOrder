@@ -6,6 +6,6 @@
         public const string Email = "Email";
         public const string FullName = "FullName";
         public const string CompanyId = "CompanyId";
-        public const string Catering = "CateringId";
+        public const string CateringId = "CateringId";
     }
 }

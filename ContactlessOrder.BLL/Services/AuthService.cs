@@ -218,10 +218,9 @@ namespace ContactlessOrder.BLL.Services
 
             var claims = new List<Claim>
             {
-                new Claim(TokenProperties.Id, catering.Id.ToString()),
+                new Claim(TokenProperties.CateringId, catering.Id.ToString()),
                 new Claim(TokenProperties.Email, catering.Login),
                 new Claim(TokenProperties.FullName, catering.Name),
-                new Claim(TokenProperties.Catering, true.ToString()),
             };
 
             var tokenDescription = new SecurityTokenDescriptor

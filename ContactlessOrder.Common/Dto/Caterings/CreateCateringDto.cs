@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ContactlessOrder.Common.Dto.Caterings
 {
@@ -10,5 +11,7 @@ namespace ContactlessOrder.Common.Dto.Caterings
         public bool FullDay { get; set; }
         public TimeDto OpenTime { get; set; }
         public TimeDto CloseTime { get; set; }
+
+        public IEnumerable<int> MenuIds { get; set; }
     }
 }

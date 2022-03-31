@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ContactlessOrder.DAL.Entities.Companies
 {
@@ -21,5 +22,7 @@ namespace ContactlessOrder.DAL.Entities.Companies
         public Company Company { get; set; }
         public int? CoordinatesId { get; set; }
         public Coordinate Coordinates { get; set; }
+
+        public ICollection<CateringMenuOption> MenuOptions { get; set; }
     }
 }

@@ -116,6 +116,11 @@ namespace ContactlessOrder.BLL.Services
                 var catering = _mapper.Map<Catering>(dto);
                 catering.CompanyId = company.Id;
 
+                if (dto.MenuIds != null && dto.MenuIds.Any())
+                {
+                    catering.MenuOptions = dto.MenuIds.Select(e => new CateringMenuOption() { MenuOptionId = e, Available = true, InheritPrice = true }).ToList();
+                }
+
                 var password = CryptoHelper.GeneratePassword(16);
                 catering.Login = $"{company.Name}.{catering.Name}".ToLower().Replace(" ", "_");
                 catering.PasswordHash = CryptoHelper.GetMd5Hash(password);
@@ -140,6 +145,8 @@ namespace ContactlessOrder.BLL.Services
             if (catering != null)
             {
                 _mapper.Map(dto, catering);
+
+                await RemoveCateringMenuOptions(id, dto.MenuIds);
 
                 await _companyRepository.SaveChanges();
             }
@@ -173,6 +180,15 @@ namespace ContactlessOrder.BLL.Services
             var menu = await _companyRepository.GetMenuItems(userId);
 
             var dtos = _mapper.Map<IEnumerable<MenuItemDto>>(menu);
+
+            return dtos;
+        }
+
+        public async Task<IEnumerable<IdNameDto>> GetMenuOptions(int userId)
+        {
+            var menu = await _companyRepository.GetMenuItems(userId);
+
+            var dtos = menu.SelectMany(e => e.Options).Select(e => new IdNameDto() { Id = e.Id, Name = $"{e.MenuItem.Name} ({e.Name})" });
 
             return dtos;
         }
@@ -277,6 +293,25 @@ namespace ContactlessOrder.BLL.Services
             else
             {
                 var options = await _companyRepository.GetAll<MenuItemOption>(e => e.MenuItemId == menuId);
+                _companyRepository.RemoveRange(options);
+            }
+        }
+
+        private async Task RemoveCateringMenuOptions(int cateringId, IEnumerable<int> ids)
+        {
+            var options = await _companyRepository.GetAll<CateringMenuOption>(e => e.CateringId == cateringId);
+
+            if (ids != null && ids.Any())
+            {
+                var toDelete = options.Where(e => !ids.Contains(e.MenuOptionId));
+                var toCreate = ids.Where(e => !options.Select(e => e.MenuOptionId).Contains(e))
+                    .Select(e => new CateringMenuOption() { CateringId = cateringId, MenuOptionId = e, Available = true, InheritPrice = true });
+
+                _companyRepository.RemoveRange(toDelete);
+                await _companyRepository.AddRange(toCreate);
+            }
+            else
+            {
                 _companyRepository.RemoveRange(options);
             }
         }

@@ -25,7 +25,8 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
                 .ForMember(e => e.CloseTime, opt => opt.MapFrom(e => MapToTimeSpan(e.CloseTime)));
             CreateMap<Catering, CateringDto>()
                 .ForMember(e => e.OpenTime, opt => opt.MapFrom(e => MapToTimeDto(e.OpenTime)))
-                .ForMember(e => e.CloseTime, opt => opt.MapFrom(e => MapToTimeDto(e.CloseTime)));
+                .ForMember(e => e.CloseTime, opt => opt.MapFrom(e => MapToTimeDto(e.CloseTime)))
+                .ForMember(e => e.MenuIds, opt => opt.MapFrom(e => e.MenuOptions.Select(e => e.MenuOptionId)));
 
 
             CreateMap<MenuItemPicture, AttachmentDto>();

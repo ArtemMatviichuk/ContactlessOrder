@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace ContactlessOrder.Common.Dto.Caterings
 {
@@ -14,5 +14,7 @@ namespace ContactlessOrder.Common.Dto.Caterings
 
         public int CompanyId { get; set; }
         public CoordinateDto Coordinates { get; set; }
+
+        public IEnumerable<int> MenuIds { get; set; }
     }
 }

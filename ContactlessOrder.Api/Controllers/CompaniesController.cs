@@ -4,9 +4,6 @@ using ContactlessOrder.Common.Dto.Caterings;
 using ContactlessOrder.Common.Dto.Companies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -118,6 +115,15 @@ namespace ContactlessOrder.Api.Controllers
         {
             int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
             var menu = await _companyService.GetMenu(userId);
+
+            return Ok(menu);
+        }
+
+        [HttpGet("MenuOptions")]
+        public async Task<IActionResult> GetMenuOptions()
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            var menu = await _companyService.GetMenuOptions(userId);
 
             return Ok(menu);
         }

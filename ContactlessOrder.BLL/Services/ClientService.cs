@@ -6,6 +6,7 @@ using ContactlessOrder.DAL.Interfaces;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ContactlessOrder.Common.Dto.Common;
 
 namespace ContactlessOrder.BLL.Services
 {
@@ -50,6 +51,11 @@ namespace ContactlessOrder.BLL.Services
                 });
 
             return dtos;
+        }
+
+        public async Task GetCartData(IEnumerable<CartItem> items)
+        {
+            var options = await _cateringRepository.GetMenuOptions(items.Select(e => e.Id));
         }
     }
 }

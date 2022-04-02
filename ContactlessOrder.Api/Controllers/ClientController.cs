@@ -1,7 +1,9 @@
 ﻿using ContactlessOrder.BLL.Interfaces;
 using ContactlessOrder.Common.Dto.Clients;
+using ContactlessOrder.Common.Dto.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ContactlessOrder.Api.Controllers
@@ -32,6 +34,14 @@ namespace ContactlessOrder.Api.Controllers
             var menu = await _clientService.GetCateringMenu(id);
 
             return Ok(menu);
+        }
+
+        [HttpGet("Cart")]
+        public async Task<IActionResult> GetCartData([FromQuery] ValueDto<IEnumerable<CartItem>> dto)
+        {
+            var cart = await _clientService.GetCartData(dto.Value);
+
+            return Ok(cart);
         }
     }
 }

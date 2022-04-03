@@ -7,6 +7,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ContactlessOrder.Common.Dto.Common;
+using System;
+using ContactlessOrder.DAL.Entities.Companies;
 
 namespace ContactlessOrder.BLL.Services
 {
@@ -53,9 +55,26 @@ namespace ContactlessOrder.BLL.Services
             return dtos;
         }
 
-        public async Task GetCartData(IEnumerable<CartItem> items)
+        public async Task<IEnumerable<CartOptionDto>> GetCartData(IEnumerable<int> itemIds)
         {
-            var options = await _cateringRepository.GetMenuOptions(items.Select(e => e.Id));
+            if (itemIds != null && itemIds.Any())
+            {
+                var options = await _cateringRepository.GetMenuOptions(itemIds);
+
+                var dtos = _mapper.Map<IEnumerable<CartOptionDto>>(options);
+
+                return dtos;
+            }
+            else return Array.Empty<CartOptionDto>();
+        }
+
+        public async Task<IEnumerable<AttachmentDto>> GetMenuPictures(int id)
+        {
+            var pictures = await _cateringRepository.GetMenuItemPictures(id);
+
+            var dtos = _mapper.Map<IEnumerable<AttachmentDto>>(pictures);
+
+            return dtos;
         }
     }
 }

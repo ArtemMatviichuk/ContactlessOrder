@@ -27,6 +27,14 @@ namespace ContactlessOrder.DAL.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<MenuItemPicture>> GetMenuItemPictures(int id)
+        {
+            return await Context.Set<MenuItemPicture>()
+                .Include(p => p.MenuItem.Options)
+                .Where(p => p.MenuItem.Options.Select(e => e.Id).Contains(id))
+                .ToListAsync();
+        }
+
         public async Task<CateringMenuOption> GetMenuOption(int id)
         {
             return await Context.Set<CateringMenuOption>()
@@ -37,8 +45,9 @@ namespace ContactlessOrder.DAL.Repositories
         public async Task<IEnumerable<CateringMenuOption>> GetMenuOptions(IEnumerable<int> ids)
         {
             return await Context.Set<CateringMenuOption>()
-                .Include(e => e.MenuOption.MenuItem)
-                .Where(e => ids.Contains(e.Id))
+                .Include(e => e.MenuOption.MenuItem.Pictures)
+                .Include(e => e.Catering.Company)
+                .Where(e => ids.Contains(e.MenuOptionId))
                 .ToListAsync();
         }
 

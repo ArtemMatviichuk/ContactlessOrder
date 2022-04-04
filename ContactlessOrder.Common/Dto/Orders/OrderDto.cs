@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ContactlessOrder.Common.Dto.Orders
 {
@@ -10,7 +6,7 @@ namespace ContactlessOrder.Common.Dto.Orders
     {
         public int Id { get; set; }
         public string Number { get; set; }
-        public int TotalCost { get; set; }
+        public int TotalPrice { get; set; }
         public string Comment { get; set; }
 
         public int StatusId { get; set; }

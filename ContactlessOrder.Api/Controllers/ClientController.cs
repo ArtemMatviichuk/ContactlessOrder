@@ -1,9 +1,12 @@
 ﻿using ContactlessOrder.BLL.Interfaces;
+using ContactlessOrder.Common.Constants;
 using ContactlessOrder.Common.Dto.Clients;
 using ContactlessOrder.Common.Dto.Common;
+using ContactlessOrder.Common.Dto.Orders;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace ContactlessOrder.Api.Controllers
@@ -50,6 +53,46 @@ namespace ContactlessOrder.Api.Controllers
             var cart = await _clientService.GetMenuPictures(id);
 
             return Ok(cart);
+        }
+
+        [HttpGet("Order")]
+        public async Task<IActionResult> GetOrders()
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            var orders = await _clientService.GetOrders(userId);
+
+            return Ok(orders);
+        }
+
+        [HttpPost("Order")]
+        public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            int id = await _clientService.CreateOrder(userId, dto);
+
+            return Ok(id);
+        }
+
+        [HttpPut("Order")]
+        public async Task<IActionResult> OrderPaid(IdNameDto dto)
+        {
+            await _clientService.OrderPaid(dto);
+
+            return Ok();
+        }
+
+        [HttpGet("Order/{id}/TotalPrice")]
+        public async Task<IActionResult> GetOrderTotalPrice(int id)
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            int totalPrice = await _clientService.GetOrderTotalPrice(id, userId);
+
+            if (totalPrice == -1)
+            {
+                return BadRequest("Помилка");
+            }
+
+            return Ok(totalPrice);
         }
     }
 }

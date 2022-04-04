@@ -11,6 +11,7 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Orders
             builder.ToTable("Orders");
 
             builder.HasOne(e => e.Status).WithMany().HasForeignKey(e => e.StatusId);
+            builder.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

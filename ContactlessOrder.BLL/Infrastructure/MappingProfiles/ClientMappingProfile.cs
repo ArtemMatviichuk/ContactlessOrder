@@ -2,7 +2,9 @@
 using ContactlessOrder.Common.Dto.Caterings;
 using ContactlessOrder.Common.Dto.Clients;
 using ContactlessOrder.Common.Dto.Companies;
+using ContactlessOrder.Common.Dto.Orders;
 using ContactlessOrder.DAL.Entities.Companies;
+using ContactlessOrder.DAL.Entities.Orders;
 using System;
 using System.Linq;
 
@@ -19,10 +21,17 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
 
             CreateMap<CateringMenuOption, CartOptionDto>()
                     .ForMember(e => e.Id, opt => opt.MapFrom(option => option.MenuOption.Id))
+                    .ForMember(e => e.CateringOptionId, opt => opt.MapFrom(option => option.Id))
                     .ForMember(e => e.Price, opt => opt.MapFrom(option => option.Price ?? option.MenuOption.Price))
                     .ForMember(e => e.Name, opt => opt.MapFrom(option => $"{option.MenuOption.MenuItem.Name} ({ option.MenuOption.Name})"))
                     .ForMember(e => e.CompanyName, opt => opt.MapFrom(option => option.Catering.Company.Name))
                     .ForMember(e => e.FirstPictureId, opt => opt.MapFrom(option => option.MenuOption.MenuItem.Pictures.FirstOrDefault().Id));
+
+            CreateMap<Order, OrderDto>()
+                .ForMember(e => e.TotalPrice, opt => opt.MapFrom(order =>
+                    order.Positions.Select(e => (e.Option.InheritPrice ? e.Option.MenuOption.Price : e.Option.Price.Value) * e.Quantity).Sum()))
+                .ForMember(e => e.Number, opt => opt.MapFrom(e => $"{e.Id:d16}"))
+                .ForMember(e => e.Positions, opt => opt.MapFrom(e => e.Positions.Select(p => MapPosition(p))));
         }
 
         private static TimeDto MapToTimeDto(TimeSpan? data)
@@ -33,6 +42,16 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
             }
 
             return new TimeDto() { Hour = data.Value.Hours, Minute = data.Value.Minutes };
+        }
+
+        private static OrderPositionDto MapPosition(OrderPosition position)
+        {
+            return new OrderPositionDto()
+            {
+                OptionId = position.Id,
+                OptionName = $"{position.Option.MenuOption.MenuItem.Name} ({ position.Option.MenuOption.Name})",
+                Quantity = position.Quantity,
+            };
         }
     }
 }

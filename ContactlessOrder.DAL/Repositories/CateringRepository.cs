@@ -1,4 +1,5 @@
-﻿using ContactlessOrder.DAL.EF;
+﻿using ContactlessOrder.Common.Constants;
+using ContactlessOrder.DAL.EF;
 using ContactlessOrder.DAL.Entities.Companies;
 using ContactlessOrder.DAL.Entities.Orders;
 using ContactlessOrder.DAL.Interfaces;
@@ -57,7 +58,8 @@ namespace ContactlessOrder.DAL.Repositories
                 .Include(e => e.Status)
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Option.MenuOption)
-                .Where(e => e.Positions.Select(e => e.Option.CateringId).FirstOrDefault() == cateringId)
+                .Where(e => e.Positions.Select(e => e.Option.CateringId).FirstOrDefault() == cateringId
+                    && e.Status.Value > OrderStatuses.CreatedStatusValue)
                 .ToListAsync();
         }
     }

@@ -3,6 +3,7 @@
     public class CartOptionDto : ClientMenuOptionDto
     {
         public int CateringId { get; set; }
+        public int CateringOptionId { get; set; }
         public string CompanyName { get; set; }
         public int? FirstPictureId { get; set; }
     }

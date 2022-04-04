@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using ContactlessOrder.Common.Dto.Common;
 using System;
 using ContactlessOrder.DAL.Entities.Companies;
+using ContactlessOrder.Common.Dto.Orders;
+using ContactlessOrder.DAL.Entities.Orders;
+using ContactlessOrder.Common.Constants;
 
 namespace ContactlessOrder.BLL.Services
 {
@@ -68,6 +71,15 @@ namespace ContactlessOrder.BLL.Services
             else return Array.Empty<CartOptionDto>();
         }
 
+        public async Task<IEnumerable<OrderDto>> GetOrders(int userId)
+        {
+            var orders = await _clientRepository.GetOrders(userId);
+
+            var dtos = _mapper.Map<IEnumerable<OrderDto>>(orders);
+
+            return dtos;
+        }
+
         public async Task<IEnumerable<AttachmentDto>> GetMenuPictures(int id)
         {
             var pictures = await _cateringRepository.GetMenuItemPictures(id);
@@ -75,6 +87,55 @@ namespace ContactlessOrder.BLL.Services
             var dtos = _mapper.Map<IEnumerable<AttachmentDto>>(pictures);
 
             return dtos;
+        }
+
+        public async Task<int> CreateOrder(int userId, CreateOrderDto dto)
+        {
+            var status = await _clientRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.CreatedStatusValue);
+
+            Order order = new Order()
+            {
+                Comment = dto.Comment,
+                StatusId = status.Id,
+                UserId = userId,
+                Positions = dto.Positions.Select(p => new OrderPosition()
+                {
+                    Quantity = p.Quantity,
+                    OptionId = p.OptionId,
+                }).ToList()
+            };
+
+            await _clientRepository.Add(order);
+            await _clientRepository.SaveChanges();
+
+            return order.Id;
+        }
+
+        public async Task OrderPaid(IdNameDto dto)
+        {
+            var order = await _clientRepository.Get<Order>(dto.Id);
+
+            if (order != null)
+            {
+                var status = await _clientRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.PaidStatusValue);
+                order.StatusId = status.Id;
+                order.PaymentNumber = dto.Name;
+
+                await _clientRepository.SaveChanges();
+                //notify catering
+            }
+        }
+
+        public async Task<int> GetOrderTotalPrice(int id, int userId)
+        {
+            var order = await _clientRepository.GetOrder(id);
+
+            if (order != null && order.UserId == userId)
+            {
+                return order.Positions.Select(e => (e.Option.InheritPrice ? e.Option.MenuOption.Price : e.Option.Price.Value) * e.Quantity).Sum();
+            }
+
+            return -1;
         }
     }
 }

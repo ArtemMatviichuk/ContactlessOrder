@@ -40,7 +40,7 @@ namespace ContactlessOrder.DAL.Repositories
             return await Context.Set<Order>()
                 .Include(e => e.Status)
                 .Include(e => e.Positions)
-                .ThenInclude(e => e.Option.MenuOption.MenuItem)
+                .ThenInclude(e => e.Option.MenuOption.MenuItem.Pictures)
                 .Where(e => e.UserId == userId)
                 .ToListAsync();
         }

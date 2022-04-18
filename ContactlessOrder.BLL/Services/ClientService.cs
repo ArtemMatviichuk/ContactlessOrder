@@ -75,7 +75,7 @@ namespace ContactlessOrder.BLL.Services
         {
             var orders = await _clientRepository.GetOrders(userId);
 
-            var dtos = _mapper.Map<IEnumerable<OrderDto>>(orders);
+            var dtos = _mapper.Map<IEnumerable<OrderDto>>(orders.OrderByDescending(e => e.CreatedDate));
 
             return dtos;
         }
@@ -98,6 +98,7 @@ namespace ContactlessOrder.BLL.Services
                 Comment = dto.Comment,
                 StatusId = status.Id,
                 UserId = userId,
+                CreatedDate = DateTime.Now,
                 Positions = dto.Positions.Select(p => new OrderPosition()
                 {
                     Quantity = p.Quantity,
@@ -122,7 +123,7 @@ namespace ContactlessOrder.BLL.Services
                 order.PaymentNumber = dto.Name;
 
                 await _clientRepository.SaveChanges();
-                //notify catering
+                //notify catering and client
             }
         }
 

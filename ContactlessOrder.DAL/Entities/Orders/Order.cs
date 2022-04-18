@@ -1,4 +1,5 @@
 ﻿using ContactlessOrder.DAL.Entities.Users;
+using System;
 using System.Collections.Generic;
 
 namespace ContactlessOrder.DAL.Entities.Orders
@@ -13,6 +14,8 @@ namespace ContactlessOrder.DAL.Entities.Orders
         public OrderStatus Status { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
+
+        public DateTime CreatedDate { get; set; }
 
         public ICollection<OrderPosition> Positions { get; set; }
     }

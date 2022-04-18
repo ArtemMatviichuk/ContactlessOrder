@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ContactlessOrder.Common.Dto.Orders
 {
@@ -12,6 +13,8 @@ namespace ContactlessOrder.Common.Dto.Orders
         public int StatusId { get; set; }
         public string StatusName { get; set; }
         public int StatusValue { get; set; }
+
+        public DateTime CreatedDate { get; set; }
 
         public IEnumerable<OrderPositionDto> Positions { get; set; }
     }

@@ -122,7 +122,7 @@ namespace ContactlessOrder.BLL.Services
                 }
 
                 var password = CryptoHelper.GeneratePassword(16);
-                catering.Login = $"{company.Name}.{catering.Name}".ToLower().Replace(" ", "_");
+                catering.Login = CryptoHelper.GeneratePassword(16);
                 catering.PasswordHash = CryptoHelper.GetMd5Hash(password);
 
                 await _companyRepository.Add(catering);

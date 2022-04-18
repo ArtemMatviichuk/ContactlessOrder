@@ -57,7 +57,7 @@ namespace ContactlessOrder.DAL.Repositories
             return await Context.Set<Order>()
                 .Include(e => e.Status)
                 .Include(e => e.Positions)
-                .ThenInclude(e => e.Option.MenuOption)
+                .ThenInclude(e => e.Option.MenuOption.MenuItem.Pictures)
                 .Where(e => e.Positions.Select(e => e.Option.CateringId).FirstOrDefault() == cateringId
                     && e.Status.Value > OrderStatuses.CreatedStatusValue)
                 .ToListAsync();

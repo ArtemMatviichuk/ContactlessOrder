@@ -12,6 +12,9 @@ using ContactlessOrder.DAL.Entities.Companies;
 using ContactlessOrder.Common.Dto.Orders;
 using ContactlessOrder.DAL.Entities.Orders;
 using ContactlessOrder.Common.Constants;
+using ContactlessOrder.BLL.HubConnections.HubClients;
+using ContactlessOrder.BLL.HubConnections.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ContactlessOrder.BLL.Services
 {
@@ -20,12 +23,15 @@ namespace ContactlessOrder.BLL.Services
         private readonly IClientRepository _clientRepository;
         private readonly ICateringRepository _cateringRepository;
         private readonly IMapper _mapper;
+        public readonly IHubContext<OrdersHub, IOrdersHubClient> _ordersHub;
 
-        public ClientService(IClientRepository clientRepository, IMapper mapper, ICateringRepository cateringRepository)
+        public ClientService(IClientRepository clientRepository, IMapper mapper, ICateringRepository cateringRepository,
+            IHubContext<OrdersHub, IOrdersHubClient> ordersHub)
         {
             _clientRepository = clientRepository;
             _mapper = mapper;
             _cateringRepository = cateringRepository;
+            _ordersHub = ordersHub;
         }
 
         public async Task<IEnumerable<ClientCateringDto>> GetCaterings(GetCateringsDto dto)
@@ -58,11 +64,17 @@ namespace ContactlessOrder.BLL.Services
             return dtos;
         }
 
-        public async Task<IEnumerable<CartOptionDto>> GetCartData(IEnumerable<int> itemIds)
+        public async Task<IEnumerable<CartOptionDto>> GetCartData(IEnumerable<IdValueDto<int>> itemIds)
         {
             if (itemIds != null && itemIds.Any())
             {
-                var options = await _cateringRepository.GetMenuOptions(itemIds);
+                var options = new List<CateringMenuOption>();
+
+                foreach (var item in itemIds.GroupBy(e => e.Id))
+                {
+                    var newOptions = await _cateringRepository.GetMenuOptions(item.Key, item.Select(e => e.Value));
+                    options.AddRange(newOptions);
+                }
 
                 var dtos = _mapper.Map<IEnumerable<CartOptionDto>>(options);
 
@@ -93,7 +105,7 @@ namespace ContactlessOrder.BLL.Services
         {
             var status = await _clientRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.CreatedStatusValue);
 
-            Order order = new Order()
+            Order order = new ()
             {
                 Comment = dto.Comment,
                 StatusId = status.Id,
@@ -121,9 +133,11 @@ namespace ContactlessOrder.BLL.Services
                 var status = await _clientRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.PaidStatusValue);
                 order.StatusId = status.Id;
                 order.PaymentNumber = dto.Name;
+                order.ModifiedDate = DateTime.Now;
 
                 await _clientRepository.SaveChanges();
-                //notify catering and client
+
+                await NotifyOrderPaid(dto.Id);
             }
         }
 
@@ -137,6 +151,15 @@ namespace ContactlessOrder.BLL.Services
             }
 
             return -1;
+        }
+
+        private async Task NotifyOrderPaid(int id)
+        {
+            var order = await _clientRepository.GetOrder(id);
+            var dto = _mapper.Map<OrderDto>(order);
+
+            await _ordersHub.Clients.User($"user.{order.UserId}").OrderUpdated(dto);
+            await _ordersHub.Clients.User($"catering.{order.Positions.First().Option.CateringId}").OrderUpdated(dto);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace ContactlessOrder.BLL.Interfaces
     {
         Task<IEnumerable<ClientCateringDto>> GetCaterings(GetCateringsDto dto);
         Task<IEnumerable<ClientMenuPositionDto>> GetCateringMenu(int cateringId);
-        Task<IEnumerable<CartOptionDto>> GetCartData(IEnumerable<int> itemIds);
+        Task<IEnumerable<CartOptionDto>> GetCartData(IEnumerable<IdValueDto<int>> itemIds);
         Task<IEnumerable<AttachmentDto>> GetMenuPictures(int id);
         Task<int> CreateOrder(int userId, CreateOrderDto dto);
         Task OrderPaid(IdNameDto dto);

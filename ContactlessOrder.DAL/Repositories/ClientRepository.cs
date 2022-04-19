@@ -30,8 +30,9 @@ namespace ContactlessOrder.DAL.Repositories
         public async Task<Order> GetOrder(int id)
         {
             return await Context.Set<Order>()
+                .Include(e => e.Status)
                 .Include(e => e.Positions)
-                .ThenInclude(e => e.Option.MenuOption)
+                .ThenInclude(e => e.Option.MenuOption.MenuItem.Pictures)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 

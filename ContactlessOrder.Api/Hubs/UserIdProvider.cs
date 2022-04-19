@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using ContactlessOrder.Common.Constants;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ContactlessOrder.Api.Hubs
 {
@@ -6,7 +7,8 @@ namespace ContactlessOrder.Api.Hubs
     {
         public string GetUserId(HubConnectionContext connection)
         {
-            return connection.User?.FindFirst("Id")?.Value;
+            var prefix = connection.User?.FindFirst(TokenProperties.CateringId)?.Value;
+            return prefix != null ? "catering." : "user." + connection.User?.FindFirst("Id")?.Value;
         }
     }
 }

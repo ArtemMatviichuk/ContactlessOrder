@@ -40,7 +40,7 @@ namespace ContactlessOrder.Api.Controllers
         }
 
         [HttpGet("Cart")]
-        public async Task<IActionResult> GetCartData([FromQuery] ValueDto<IEnumerable<int>> dto)
+        public async Task<IActionResult> GetCartData([FromQuery] ValueDto<IEnumerable<IdValueDto<int>>> dto)
         {
             var cart = await _clientService.GetCartData(dto.Value);
 

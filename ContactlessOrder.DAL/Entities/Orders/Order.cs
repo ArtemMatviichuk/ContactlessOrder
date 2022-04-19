@@ -16,6 +16,7 @@ namespace ContactlessOrder.DAL.Entities.Orders
         public User User { get; set; }
 
         public DateTime CreatedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; }
 
         public ICollection<OrderPosition> Positions { get; set; }
     }

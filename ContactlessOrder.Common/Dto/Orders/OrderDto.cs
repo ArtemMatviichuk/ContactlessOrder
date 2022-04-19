@@ -15,6 +15,7 @@ namespace ContactlessOrder.Common.Dto.Orders
         public int StatusValue { get; set; }
 
         public DateTime CreatedDate { get; set; }
+        public DateTime? ModifiedDate { get; set; }
 
         public IEnumerable<OrderPositionDto> Positions { get; set; }
     }

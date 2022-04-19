@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Net;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using ContactlessOrder.Api.Hubs;
@@ -12,6 +11,7 @@ using ContactlessOrder.BLL.Infrastructure;
 using ContactlessOrder.BLL.Infrastructure.MappingProfiles;
 using ContactlessOrder.BLL.Interfaces;
 using ContactlessOrder.BLL.Services;
+using ContactlessOrder.BLL.HubConnections.Hubs;
 using ContactlessOrder.Common.Constants;
 using ContactlessOrder.Common.Dto.Auth;
 using ContactlessOrder.DAL.EF;
@@ -22,6 +22,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -203,6 +204,7 @@ namespace ContactlessOrder.Api
             app.UseEndpoints(c =>
             {
                 c.MapControllers();
+                c.MapHub<OrdersHub>("/orders", opt => opt.Transports = HttpTransportType.WebSockets);
             });
         }
     }

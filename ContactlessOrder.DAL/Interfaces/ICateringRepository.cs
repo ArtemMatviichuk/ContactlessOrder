@@ -12,7 +12,7 @@ namespace ContactlessOrder.DAL.Interfaces
     {
         Task<IEnumerable<CateringMenuOption>> GetMenu(int cateringId);
         Task<CateringMenuOption> GetMenuOption(int id);
-        Task<IEnumerable<CateringMenuOption>> GetMenuOptions(IEnumerable<int> id);
+        Task<IEnumerable<CateringMenuOption>> GetMenuOptions(int cateringId, IEnumerable<int> ids);
         Task<IEnumerable<Order>> GetOrders(int cateringId);
         Task<IEnumerable<MenuItemPicture>> GetMenuItemPictures(int id);
     }

@@ -24,5 +24,6 @@ namespace ContactlessOrder.DAL.Entities.Companies
         public Coordinate Coordinates { get; set; }
 
         public ICollection<CateringMenuOption> MenuOptions { get; set; }
+        public ICollection<CateringMenuModification> MenuModifications { get; set; }
     }
 }

@@ -32,6 +32,15 @@ namespace ContactlessOrder.Api.Controllers
             return Ok(menu);
         }
 
+        [HttpGet("Modifications")]
+        public async Task<IActionResult> GetModifications()
+        {
+            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.CateringId));
+            var modifications = await _cateringService.GetModifications(cateringId);
+
+            return Ok(modifications);
+        }
+
         [HttpPut("Menu/{id}")]
         public async Task<IActionResult> UpdateMenuOption(int id, [FromBody] UpdateCateringMenuOptionDto dto)
         {

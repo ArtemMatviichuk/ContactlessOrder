@@ -12,5 +12,6 @@ namespace ContactlessOrder.Common.Dto.Companies
 
         public int? FirstPictureId { get; set; }
         public ICollection<MenuItemOptionDto> Options { get; set; }
+        public ICollection<MenuModificationDto> Modifications { get; set; }
     }
 }

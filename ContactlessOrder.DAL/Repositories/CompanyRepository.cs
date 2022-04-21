@@ -42,6 +42,7 @@ namespace ContactlessOrder.DAL.Repositories
         {
             return await Context.Set<MenuItem>()
                 .Include(e => e.Options)
+                .Include(e => e.MenuItemModifications)
                 .Include(e => e.Company)
                 .Include(e => e.Pictures)
                 .Where(e => e.Company.UserId == userId)

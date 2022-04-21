@@ -1,5 +1,4 @@
 ﻿using ContactlessOrder.DAL.Entities.Users;
-using System;
 using System.Collections.Generic;
 
 namespace ContactlessOrder.DAL.Entities.Companies
@@ -15,5 +14,6 @@ namespace ContactlessOrder.DAL.Entities.Companies
         public User User { get; set; }
 
         public IEnumerable<Catering> Caterings { get; set; }
+        public IEnumerable<Modification> Modifications { get; set; }
     }
 }

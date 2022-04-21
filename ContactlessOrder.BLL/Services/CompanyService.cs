@@ -234,6 +234,7 @@ namespace ContactlessOrder.BLL.Services
                 }
 
                 await RemoveOptions(id, dto.Options);
+                await RemoveModifications(id, dto.Modifications);
 
                 await _companyRepository.SaveChanges();
             }
@@ -265,6 +266,43 @@ namespace ContactlessOrder.BLL.Services
             return await _fileHelper.GetFile(attachment.FileName, _configuration[AppConstants.FilePath]);
         }
 
+        public async Task<IEnumerable<IdNamePriceDto>> GetModifications(int userId)
+        {
+            var company = await _companyRepository.Get<Company>(e => e.UserId == userId);
+            var modifications = await _companyRepository.GetAll<Modification>(e => e.CompanyId == company.Id);
+
+            var dtos = _mapper.Map<IEnumerable<IdNamePriceDto>>(modifications);
+
+            return dtos;
+        }
+
+        public async Task CreateModification(int userId, ValueDto<IEnumerable<NamePriceDto>> dto)
+        {
+            var company = await _companyRepository.Get<Company>(e => e.UserId == userId);
+            var modifications = _mapper.Map<IEnumerable<Modification>>(dto.Value);
+
+            foreach (var item in modifications)
+            {
+                item.CompanyId = company.Id;
+            }
+
+            await _companyRepository.AddRange(modifications);
+            await _companyRepository.SaveChanges();
+        }
+
+        public async Task UpdateModification(int id, NamePriceDto dto)
+        {
+            var modification = await _companyRepository.Get<Modification>(id);
+            _mapper.Map(dto, modification);
+            await _companyRepository.SaveChanges();
+        }
+
+        public async Task DeleteModification(int id)
+        {
+            await _companyRepository.Remove<Modification>(id);
+            await _companyRepository.SaveChanges();
+        }
+
         private async Task<List<MenuItemPicture>> SavePictures(IEnumerable<IFormFile> files)
         {
             var pictures = new List<MenuItemPicture>();
@@ -282,7 +320,7 @@ namespace ContactlessOrder.BLL.Services
             return pictures;
         }
 
-        private async Task RemoveOptions(int menuId, IEnumerable<MenuItemOptionDto> dtos)
+        private async Task RemoveOptions(int menuId, IEnumerable<IdNamePriceDto> dtos)
         {
             if (dtos != null && dtos.Any())
             {
@@ -294,6 +332,25 @@ namespace ContactlessOrder.BLL.Services
             {
                 var options = await _companyRepository.GetAll<MenuItemOption>(e => e.MenuItemId == menuId);
                 _companyRepository.RemoveRange(options);
+            }
+        }
+
+        private async Task RemoveModifications(int menuId, IEnumerable<int> ids)
+        {
+            var modifications = await _companyRepository.GetAll<MenuItemModification>(e => e.MenuItemId == menuId);
+
+            if (ids != null && ids.Any())
+            {
+                var toDelete = modifications.Where(e => !ids.Contains(e.ModificationId));
+                var toCreate = ids.Where(e => !modifications.Select(e => e.ModificationId).Contains(e))
+                    .Select(e => new MenuItemModification() { MenuItemId = menuId, ModificationId = e });
+
+                _companyRepository.RemoveRange(toDelete);
+                await _companyRepository.AddRange(toCreate);
+            }
+            else
+            {
+                _companyRepository.RemoveRange(modifications);
             }
         }
 

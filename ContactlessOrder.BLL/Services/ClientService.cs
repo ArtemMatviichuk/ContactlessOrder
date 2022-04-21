@@ -20,18 +20,20 @@ namespace ContactlessOrder.BLL.Services
 {
     public class ClientService : IClientService
     {
+        private readonly INotificationService _notificationService;
         private readonly IClientRepository _clientRepository;
         private readonly ICateringRepository _cateringRepository;
         private readonly IMapper _mapper;
         public readonly IHubContext<OrdersHub, IOrdersHubClient> _ordersHub;
 
         public ClientService(IClientRepository clientRepository, IMapper mapper, ICateringRepository cateringRepository,
-            IHubContext<OrdersHub, IOrdersHubClient> ordersHub)
+            IHubContext<OrdersHub, IOrdersHubClient> ordersHub, INotificationService notificationService)
         {
             _clientRepository = clientRepository;
             _mapper = mapper;
             _cateringRepository = cateringRepository;
             _ordersHub = ordersHub;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<ClientCateringDto>> GetCaterings(GetCateringsDto dto)
@@ -137,7 +139,7 @@ namespace ContactlessOrder.BLL.Services
 
                 await _clientRepository.SaveChanges();
 
-                await NotifyOrderPaid(dto.Id);
+                await _notificationService.NotifyOrderUpdated(dto.Id);
             }
         }
 
@@ -151,15 +153,6 @@ namespace ContactlessOrder.BLL.Services
             }
 
             return -1;
-        }
-
-        private async Task NotifyOrderPaid(int id)
-        {
-            var order = await _clientRepository.GetOrder(id);
-            var dto = _mapper.Map<OrderDto>(order);
-
-            await _ordersHub.Clients.User($"user.{order.UserId}").OrderUpdated(dto);
-            await _ordersHub.Clients.User($"catering.{order.Positions.First().Option.CateringId}").OrderUpdated(dto);
         }
     }
 }

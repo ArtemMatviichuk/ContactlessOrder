@@ -30,7 +30,9 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
 
 
             CreateMap<MenuItemPicture, AttachmentDto>();
-            CreateMap<MenuItemOption, MenuItemOptionDto>().ReverseMap();
+            CreateMap<MenuItemOption, IdNamePriceDto>().ReverseMap();
+            CreateMap<Modification, IdNamePriceDto>();
+            CreateMap<NamePriceDto, Modification>();
 
             CreateMap<CreateMenuItemDto, MenuItem>()
                 .ForMember(e => e.Pictures, opt => opt.Ignore());
@@ -39,7 +41,8 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
                 .ForMember(e => e.Pictures, opt => opt.Ignore());
 
             CreateMap<MenuItem, MenuItemDto>()
-                .ForMember(e => e.FirstPictureId, opt => opt.MapFrom(e => e.Pictures.FirstOrDefault().Id));
+                .ForMember(e => e.FirstPictureId, opt => opt.MapFrom(e => e.Pictures.FirstOrDefault().Id))
+                .ForMember(e => e.Modifications, opt => opt.MapFrom(e => e.MenuItemModifications.Select(e => e.ModificationId)));
         }
 
         private static TimeSpan? MapToTimeSpan(TimeDto dto)

@@ -2,6 +2,7 @@
 using ContactlessOrder.BLL.Interfaces;
 using ContactlessOrder.Common.Dto.Caterings;
 using ContactlessOrder.Common.Dto.Orders;
+using ContactlessOrder.DAL.Entities.Companies;
 using ContactlessOrder.DAL.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace ContactlessOrder.BLL.Services
 
             var dtos = _mapper.Map<IEnumerable<CateringMenuOptionDto>>(menu);
 
-            return dtos;
+            return dtos.OrderBy(e => e.Name);
         }
 
         public async Task<string> UpdateMenuOption(int id, UpdateCateringMenuOptionDto dto)
@@ -55,6 +56,57 @@ namespace ContactlessOrder.BLL.Services
             var dtos = _mapper.Map<IEnumerable<OrderDto>>(orders);
 
             return dtos;
+        }
+
+        public async Task<IEnumerable<CateringModificationDto>> GetModifications(int cateringId)
+        {
+            var catering = await _cateringRepository.GetFullCatering(cateringId);
+
+            var cateringModifications = catering.CateringModifications;
+            var modifications = catering.MenuOptions.SelectMany(e =>
+                    e.MenuOption.MenuItem.MenuItemModifications.Select(m => m.Modification))
+                .GroupBy(e => e.Id)
+                .Select(e => e.First());
+
+            return modifications.Select(m =>
+            {
+                var item = cateringModifications.FirstOrDefault(e => e.ModificationId == m.Id);
+                return new CateringModificationDto()
+                {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Price = item == null || item.InheritPrice ? m.Price : item.Price.Value,
+                    Available = item == null ? true : item.Available,
+                    InheritPrice = item == null ? true : item.InheritPrice,
+                };
+            });
+        }
+
+        public async Task UpdateModification(int id, int cateringId, UpdateCateringMenuOptionDto dto)
+        {
+            var modification = await _cateringRepository.Get<CateringModification>(e => e.CateringId == cateringId && e.ModificationId == id);
+
+            if (modification != null)
+            {
+                modification.Available = dto.Available;
+                modification.InheritPrice = dto.InheritPrice;
+                modification.Price = dto.InheritPrice ? null : dto.Price;
+            }
+            else
+            {
+                modification = new CateringModification()
+                {
+                    Price = dto.Price,
+                    Available = dto.Available,
+                    InheritPrice = dto.InheritPrice,
+                    CateringId = cateringId,
+                    ModificationId = id,
+                };
+
+                await _cateringRepository.Add(modification);
+            }
+
+            await _cateringRepository.SaveChanges();
         }
     }
 }

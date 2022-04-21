@@ -13,5 +13,8 @@ namespace ContactlessOrder.BLL.Interfaces
         Task<IEnumerable<CateringMenuOptionDto>> GetMenu(int cateringId);
         Task<string> UpdateMenuOption(int id, UpdateCateringMenuOptionDto dto);
         Task<IEnumerable<OrderDto>> GetOrders(int cateringId);
+
+        Task<IEnumerable<CateringModificationDto>> GetModifications(int cateringId);
+        Task UpdateModification(int id, int cateringId, UpdateCateringMenuOptionDto dto);
     }
 }

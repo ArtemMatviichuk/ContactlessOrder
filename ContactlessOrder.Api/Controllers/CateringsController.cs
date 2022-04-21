@@ -53,5 +53,23 @@ namespace ContactlessOrder.Api.Controllers
 
             return Ok(menu);
         }
+
+        [HttpGet("Modifications")]
+        public async Task<IActionResult> GetModifications()
+        {
+            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.CateringId));
+            var modifications = await _cateringService.GetModifications(cateringId);
+
+            return Ok(modifications);
+        }
+
+        [HttpPut("Modifications/{id}")]
+        public async Task<IActionResult> UpdateModification(int id, [FromBody] UpdateCateringMenuOptionDto dto)
+        {
+            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.CateringId));
+            await _cateringService.UpdateModification(id, cateringId, dto);
+
+            return Ok();
+        }
     }
 }

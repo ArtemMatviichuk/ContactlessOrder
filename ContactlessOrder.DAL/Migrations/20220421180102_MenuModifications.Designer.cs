@@ -4,6 +4,7 @@ using ContactlessOrder.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContactlessOrder.DAL.Migrations
 {
     [DbContext(typeof(ContactlessOrderContext))]
-    partial class ContactlessOrderContextModelSnapshot : ModelSnapshot
+    [Migration("20220421180102_MenuModifications")]
+    partial class MenuModifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -76,6 +78,35 @@ namespace ContactlessOrder.DAL.Migrations
                     b.ToTable("Caterings", (string)null);
                 });
 
+            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.CateringMenuItemModification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<bool>("Available")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("CateringId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MenuItemModificationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Price")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CateringId");
+
+                    b.HasIndex("MenuItemModificationId");
+
+                    b.ToTable("CateringMenuItemModifications", (string)null);
+                });
+
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.CateringMenuOption", b =>
                 {
                     b.Property<int>("Id")
@@ -106,38 +137,6 @@ namespace ContactlessOrder.DAL.Migrations
                     b.HasIndex("MenuOptionId");
 
                     b.ToTable("CateringMenuOptions", (string)null);
-                });
-
-            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.CateringModification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<bool>("Available")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("CateringId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("InheritPrice")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("ModificationId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Price")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CateringId");
-
-                    b.HasIndex("ModificationId");
-
-                    b.ToTable("CateringModifications", (string)null);
                 });
 
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.Company", b =>
@@ -477,6 +476,25 @@ namespace ContactlessOrder.DAL.Migrations
                     b.Navigation("Coordinates");
                 });
 
+            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.CateringMenuItemModification", b =>
+                {
+                    b.HasOne("ContactlessOrder.DAL.Entities.Companies.Catering", "Catering")
+                        .WithMany("CateringMenuItemModifications")
+                        .HasForeignKey("CateringId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ContactlessOrder.DAL.Entities.Companies.MenuItemModification", "MenuItemModification")
+                        .WithMany()
+                        .HasForeignKey("MenuItemModificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Catering");
+
+                    b.Navigation("MenuItemModification");
+                });
+
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.CateringMenuOption", b =>
                 {
                     b.HasOne("ContactlessOrder.DAL.Entities.Companies.Catering", "Catering")
@@ -494,25 +512,6 @@ namespace ContactlessOrder.DAL.Migrations
                     b.Navigation("Catering");
 
                     b.Navigation("MenuOption");
-                });
-
-            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.CateringModification", b =>
-                {
-                    b.HasOne("ContactlessOrder.DAL.Entities.Companies.Catering", "Catering")
-                        .WithMany("CateringModifications")
-                        .HasForeignKey("CateringId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ContactlessOrder.DAL.Entities.Companies.Modification", "Modification")
-                        .WithMany()
-                        .HasForeignKey("ModificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Catering");
-
-                    b.Navigation("Modification");
                 });
 
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.Company", b =>
@@ -629,7 +628,7 @@ namespace ContactlessOrder.DAL.Migrations
 
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.Catering", b =>
                 {
-                    b.Navigation("CateringModifications");
+                    b.Navigation("CateringMenuItemModifications");
 
                     b.Navigation("MenuOptions");
                 });

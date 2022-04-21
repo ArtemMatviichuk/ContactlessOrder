@@ -27,5 +27,10 @@ namespace ContactlessOrder.BLL.Interfaces
         Task DeleteMenuItem(int id);
         Task<IEnumerable<AttachmentDto>> GetMenuItemPictures(int id);
         Task<FileDto> GetMenuItemPictureFile(int id);
+
+        Task<IEnumerable<IdNamePriceDto>> GetModifications(int userId);
+        Task CreateModification(int userId, ValueDto<IEnumerable<NamePriceDto>> dto);
+        Task UpdateModification(int id, NamePriceDto dto);
+        Task DeleteModification(int id);
     }
 }

@@ -13,5 +13,6 @@ namespace ContactlessOrder.DAL.Entities.Companies
 
         public ICollection<MenuItemPicture> Pictures { get; set; }
         public ICollection<MenuItemOption> Options { get; set; }
+        public ICollection<MenuItemModification> MenuItemModifications { get; set; }
     }
 }

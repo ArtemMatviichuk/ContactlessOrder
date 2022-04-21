@@ -62,5 +62,15 @@ namespace ContactlessOrder.DAL.Repositories
                     && e.Status.Value > OrderStatuses.CreatedStatusValue)
                 .ToListAsync();
         }
+
+        public async Task<Catering> GetFullCatering(int cateringId)
+        {
+            return await Context.Set<Catering>()
+                .Include(e => e.CateringModifications)
+                .Include(e => e.MenuOptions)
+                .ThenInclude(e => e.MenuOption.MenuItem.MenuItemModifications)
+                .ThenInclude(e => e.Modification)
+                .FirstOrDefaultAsync(e => e.Id == cateringId);
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace ContactlessOrder.Common.Dto.Companies
         public string Description { get; set; }
 
         public IEnumerable<IFormFile> Pictures { get; set; }
-        public ICollection<MenuItemOptionDto> Options { get; set; }
+        public ICollection<IdNamePriceDto> Options { get; set; }
+        public IEnumerable<int> Modifications { get; set; }
     }
 }

@@ -1,9 +1,11 @@
 ﻿using ContactlessOrder.BLL.Interfaces;
 using ContactlessOrder.Common.Constants;
 using ContactlessOrder.Common.Dto.Caterings;
+using ContactlessOrder.Common.Dto.Common;
 using ContactlessOrder.Common.Dto.Companies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -173,6 +175,40 @@ namespace ContactlessOrder.Api.Controllers
             }
 
             return File(file.Bytes, file.ContentType, file.FileName);
+        }
+
+        [HttpGet("Modifications")]
+        public async Task<IActionResult> GetModifications()
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            var modifications = await _companyService.GetModifications(userId);
+
+            return Ok(modifications);
+        }
+
+        [HttpPost("Modifications")]
+        public async Task<IActionResult> CreateModifications(ValueDto<IEnumerable<NamePriceDto>> dto)
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            await _companyService.CreateModification(userId, dto);
+
+            return Ok();
+        }
+
+        [HttpPut("Modifications/{id}")]
+        public async Task<IActionResult> UpdateModification(int id, NamePriceDto dto)
+        {
+            await _companyService.UpdateModification(id, dto);
+
+            return Ok();
+        }
+
+        [HttpDelete("Modifications/{id}")]
+        public async Task<IActionResult> DeleteModification(int id)
+        {
+            await _companyService.DeleteModification(id);
+
+            return Ok();
         }
     }
 }

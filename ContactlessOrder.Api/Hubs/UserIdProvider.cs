@@ -8,10 +8,7 @@ namespace ContactlessOrder.Api.Hubs
         public string GetUserId(HubConnectionContext connection)
         {
             var prefix = connection.User?.FindFirst(TokenProperties.CateringId)?.Value;
-            return prefix != null
-                ? NotificationConstants.CateringPrefix
-                : NotificationConstants.UserPrefix
-                + connection.User?.FindFirst("Id")?.Value;
+            return prefix != null ? "catering." : "user." + connection.User?.FindFirst("Id")?.Value;
         }
     }
 }

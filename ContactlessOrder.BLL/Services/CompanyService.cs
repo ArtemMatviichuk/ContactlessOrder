@@ -121,17 +121,6 @@ namespace ContactlessOrder.BLL.Services
                     catering.MenuOptions = dto.MenuIds.Select(e => new CateringMenuOption() { MenuOptionId = e, Available = true, InheritPrice = true }).ToList();
                 }
 
-/*                var menuItems = await _companyRepository.GetAll<MenuItem>(e => e.CompanyId == company.Id);
-                var modifications = await _companyRepository.GetAll<MenuModification>(e => menuItems.Select(m => m.Id).Contains(e.MenuItemId));
-                catering.MenuModifications = modifications.Select(e =>
-                    new CateringMenuModification()
-                    {
-                        MenuModificationId = e.Id,
-                        Available = true,
-                        InheritPrice = true,
-                        Price = e.Price,
-                    }).ToList();*/
-
                 var password = CryptoHelper.GeneratePassword(16);
                 catering.Login = CryptoHelper.GeneratePassword(16);
                 catering.PasswordHash = CryptoHelper.GetMd5Hash(password);
@@ -245,7 +234,6 @@ namespace ContactlessOrder.BLL.Services
                 }
 
                 await RemoveOptions(id, dto.Options);
-                await RemoveModifications(id, dto.Modifications);
 
                 await _companyRepository.SaveChanges();
             }
@@ -305,21 +293,6 @@ namespace ContactlessOrder.BLL.Services
             else
             {
                 var options = await _companyRepository.GetAll<MenuItemOption>(e => e.MenuItemId == menuId);
-                _companyRepository.RemoveRange(options);
-            }
-        }
-
-        private async Task RemoveModifications(int menuId, IEnumerable<MenuModificationDto> dtos)
-        {
-            if (dtos != null && dtos.Any())
-            {
-                var toDelete = await _companyRepository.GetAllAsTracking<MenuModification>(e => e.MenuItemId == menuId && !dtos.Select(o => o.Id).Contains(e.Id));
-
-                _companyRepository.RemoveRange(toDelete);
-            }
-            else
-            {
-                var options = await _companyRepository.GetAll<MenuModification>(e => e.MenuItemId == menuId);
                 _companyRepository.RemoveRange(options);
             }
         }

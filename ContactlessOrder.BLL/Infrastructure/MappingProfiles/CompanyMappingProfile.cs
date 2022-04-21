@@ -31,7 +31,6 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
 
             CreateMap<MenuItemPicture, AttachmentDto>();
             CreateMap<MenuItemOption, MenuItemOptionDto>().ReverseMap();
-            CreateMap<MenuModification, MenuModificationDto>().ReverseMap();
 
             CreateMap<CreateMenuItemDto, MenuItem>()
                 .ForMember(e => e.Pictures, opt => opt.Ignore());

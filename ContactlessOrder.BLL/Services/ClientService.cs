@@ -20,6 +20,7 @@ namespace ContactlessOrder.BLL.Services
 {
     public class ClientService : IClientService
     {
+        private readonly ICommonService _commonService;
         private readonly INotificationService _notificationService;
         private readonly IClientRepository _clientRepository;
         private readonly ICateringRepository _cateringRepository;
@@ -27,13 +28,14 @@ namespace ContactlessOrder.BLL.Services
         public readonly IHubContext<OrdersHub, IOrdersHubClient> _ordersHub;
 
         public ClientService(IClientRepository clientRepository, IMapper mapper, ICateringRepository cateringRepository,
-            IHubContext<OrdersHub, IOrdersHubClient> ordersHub, INotificationService notificationService)
+            IHubContext<OrdersHub, IOrdersHubClient> ordersHub, INotificationService notificationService, ICommonService commonService)
         {
             _clientRepository = clientRepository;
             _mapper = mapper;
             _cateringRepository = cateringRepository;
             _ordersHub = ordersHub;
             _notificationService = notificationService;
+            _commonService = commonService;
         }
 
         public async Task<IEnumerable<ClientCateringDto>> GetCaterings(GetCateringsDto dto)
@@ -47,6 +49,8 @@ namespace ContactlessOrder.BLL.Services
         public async Task<IEnumerable<ClientMenuPositionDto>> GetCateringMenu(int cateringId)
         {
             var menu = await _cateringRepository.GetMenu(cateringId);
+            var modifications = await _commonService.GetCateringModifications(cateringId);
+
             var dtos = menu.GroupBy(e => e.MenuOption.MenuItemId)
                 .Select(e => e.ToList())
                 .Select(e => new ClientMenuPositionDto()
@@ -60,25 +64,42 @@ namespace ContactlessOrder.BLL.Services
                         Available = option.Available,
                         Price = option.Price ?? option.MenuOption.Price,
                         Name = option.MenuOption.Name
-                    }),
+                    }).OrderBy(e => e.Price),
+                    Modifications = modifications.Where(m =>
+                        e.SelectMany(e => e.MenuOption.MenuItem.MenuItemModifications)
+                        .Select(e => e.ModificationId)
+                        .Contains(m.Id))
+                        .OrderBy(e => e.Price),
                 });
 
             return dtos;
         }
 
-        public async Task<IEnumerable<CartOptionDto>> GetCartData(IEnumerable<IdValueDto<int>> itemIds)
+        public async Task<IEnumerable<CartOptionDto>> GetCartData(IEnumerable<GetCartDto> items)
         {
-            if (itemIds != null && itemIds.Any())
+            if (items != null && items.Any())
             {
-                var options = new List<CateringMenuOption>();
+                var dtos = new List<CartOptionDto>();
 
-                foreach (var item in itemIds.GroupBy(e => e.Id))
+                foreach (var item in items.GroupBy(e => e.CateringId))
                 {
-                    var newOptions = await _cateringRepository.GetMenuOptions(item.Key, item.Select(e => e.Value));
-                    options.AddRange(newOptions);
-                }
+                    var options = await _cateringRepository.GetMenuOptions(item.Key, item.Select(e => e.Id));
+                    var modifications = await _commonService.GetCateringModifications(item.Key);
 
-                var dtos = _mapper.Map<IEnumerable<CartOptionDto>>(options);
+                    var newDtos = _mapper.Map<IEnumerable<CartOptionDto>>(options);
+
+                    foreach (var dto in newDtos)
+                    {
+                        var option = options.FirstOrDefault(e => e.MenuOption.Id == dto.Id);
+                        dto.Modifications = modifications.Where(m =>
+                            option.MenuOption.MenuItem.MenuItemModifications
+                            .Select(e => e.ModificationId)
+                            .Contains(m.Id))
+                            .OrderBy(e => e.Price);
+                    }
+
+                    dtos.AddRange(newDtos);
+                }
 
                 return dtos;
             }
@@ -90,6 +111,11 @@ namespace ContactlessOrder.BLL.Services
             var orders = await _clientRepository.GetOrders(userId);
 
             var dtos = _mapper.Map<IEnumerable<OrderDto>>(orders.OrderByDescending(e => e.CreatedDate));
+
+            foreach (var item in dtos)
+            {
+                item.TotalPrice = await GetOrderTotalPrice(item.Id, userId);
+            }
 
             return dtos;
         }
@@ -117,6 +143,10 @@ namespace ContactlessOrder.BLL.Services
                 {
                     Quantity = p.Quantity,
                     OptionId = p.OptionId,
+                    Modifications = p.ModificationIds.Select(m => new OrderPositionModification()
+                    {
+                        ModificationId = m,
+                    }).ToList()
                 }).ToList()
             };
 
@@ -128,7 +158,7 @@ namespace ContactlessOrder.BLL.Services
 
         public async Task OrderPaid(IdNameDto dto)
         {
-            var order = await _clientRepository.Get<Order>(dto.Id);
+            var order = await _clientRepository.GetOrder(dto.Id);
 
             if (order != null)
             {
@@ -136,6 +166,25 @@ namespace ContactlessOrder.BLL.Services
                 order.StatusId = status.Id;
                 order.PaymentNumber = dto.Name;
                 order.ModifiedDate = DateTime.Now;
+
+                var cateringId = order.Positions.First().Option.CateringId;
+                var modifications = await _commonService.GetCateringModifications(cateringId);
+
+                foreach (var position in order.Positions)
+                {
+                    position.OptionId = null;
+                    position.OptionName = $"{position.Option.MenuOption.MenuItem.Name} ({ position.Option.MenuOption.Name})";
+                    position.InMomentPrice = position.Option.InheritPrice
+                        ? position.Option.MenuOption.Price
+                        : position.Option.Price.Value;
+
+                    foreach (var modification in position.Modifications)
+                    {
+                        modification.InMomentPrice = modifications.First(m => m.Id == modification.ModificationId).Price;
+                        modification.ModificationName = modification.Modification.Name;
+                        modification.ModificationId = null;
+                    }
+                }
 
                 await _clientRepository.SaveChanges();
 
@@ -149,7 +198,23 @@ namespace ContactlessOrder.BLL.Services
 
             if (order != null && order.UserId == userId)
             {
-                return order.Positions.Select(e => (e.Option.InheritPrice ? e.Option.MenuOption.Price : e.Option.Price.Value) * e.Quantity).Sum();
+                if (order.Status.Value != OrderStatuses.CreatedStatusValue)
+                {
+                    return order.Positions.Select(e =>
+                    (e.InMomentPrice + e.Modifications.Select(m => m.InMomentPrice).Sum())
+                        * e.Quantity).Sum();
+                }
+
+                var cateringId = order.Positions.First().Option.CateringId;
+                var modifications = await _commonService.GetCateringModifications(cateringId);
+
+                return order.Positions.Select(e =>
+                ((e.Option.InheritPrice
+                    ? e.Option.MenuOption.Price
+                    : e.Option.Price.Value) +
+                  e.Modifications.Select(m =>
+                    modifications.First(cm => cm.Id == m.ModificationId)
+                        .Price).Sum()) * e.Quantity).Sum();
             }
 
             return -1;

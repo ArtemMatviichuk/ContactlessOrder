@@ -28,8 +28,6 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
                     .ForMember(e => e.FirstPictureId, opt => opt.MapFrom(option => option.MenuOption.MenuItem.Pictures.FirstOrDefault().Id));
 
             CreateMap<Order, OrderDto>()
-                .ForMember(e => e.TotalPrice, opt => opt.MapFrom(order =>
-                    order.Positions.Select(e => (e.Option.InheritPrice ? e.Option.MenuOption.Price : e.Option.Price.Value) * e.Quantity).Sum()))
                 .ForMember(e => e.Number, opt => opt.MapFrom(e => $"#{e.Id:d16}"))
                 .ForMember(e => e.Positions, opt => opt.MapFrom(e => e.Positions.Select(p => MapPosition(p))));
         }
@@ -49,9 +47,11 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
             return new OrderPositionDto()
             {
                 OptionId = position.Id,
-                OptionName = $"{position.Option.MenuOption.MenuItem.Name} ({ position.Option.MenuOption.Name})",
+                OptionName = position.OptionId != null
+                    ? $"{position.Option.MenuOption.MenuItem.Name} ({ position.Option.MenuOption.Name})"
+                    : position.OptionName,
                 Quantity = position.Quantity,
-                PictureId = position.Option.MenuOption.MenuItem.Pictures.FirstOrDefault()?.Id,
+                PictureId = position.Option?.MenuOption.MenuItem.Pictures.FirstOrDefault()?.Id,
             };
         }
     }

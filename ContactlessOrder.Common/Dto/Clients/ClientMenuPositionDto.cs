@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContactlessOrder.Common.Dto.Caterings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,5 +14,6 @@ namespace ContactlessOrder.Common.Dto.Clients
 
         public int? FirstPictureId { get; set; }
         public IEnumerable<ClientMenuOptionDto> Options { get; set; }
+        public IEnumerable<CateringModificationDto> Modifications { get; set; }
     }
 }

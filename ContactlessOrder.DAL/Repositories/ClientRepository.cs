@@ -33,6 +33,9 @@ namespace ContactlessOrder.DAL.Repositories
                 .Include(e => e.Status)
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Option.MenuOption.MenuItem.Pictures)
+                .Include(e => e.Positions)
+                .ThenInclude(e => e.Modifications)
+                .ThenInclude(e => e.Modification)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 

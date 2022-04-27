@@ -4,7 +4,8 @@ namespace ContactlessOrder.BLL.Interfaces
 {
     public interface INotificationService
     {
-        Task NotifyOrderUpdated(int id);
+        Task NotifyOrderPaid(int id, int totalPrice);
+        Task NotifyOrderUpdated(int id, int totalPrice);
         Task NotifyOrderReady(int id);
     }
 }

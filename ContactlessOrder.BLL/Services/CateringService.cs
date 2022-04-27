@@ -127,7 +127,7 @@ namespace ContactlessOrder.BLL.Services
 
                     await _cateringRepository.SaveChanges();
 
-                    await _notificationService.NotifyOrderUpdated(orderId);
+                    await _notificationService.NotifyOrderUpdated(orderId, await _commonService.GetOrderTotalPrice(orderId, AppConstants.ViewAll));
 
                     if (status.Value == OrderStatuses.ReadyStatusValue)
                     {

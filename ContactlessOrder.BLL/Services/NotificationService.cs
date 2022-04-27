@@ -24,10 +24,21 @@ namespace ContactlessOrder.BLL.Services
             _ordersHub = ordersHub;
         }
 
-        public async Task NotifyOrderUpdated(int id)
+        public async Task NotifyOrderPaid(int id, int totalPrice)
         {
             var order = await _clientRepository.GetOrder(id);
             var dto = _mapper.Map<OrderDto>(order);
+            dto.TotalPrice = totalPrice;
+
+            await _ordersHub.Clients.User($"{NotificationConstants.UserPrefix}{order.UserId}").OrderUpdated(dto);
+            await _ordersHub.Clients.User($"{NotificationConstants.CateringPrefix}{order.Positions.First().Option.CateringId}").OrderPaid(dto);
+        }
+
+        public async Task NotifyOrderUpdated(int id, int totalPrice)
+        {
+            var order = await _clientRepository.GetOrder(id);
+            var dto = _mapper.Map<OrderDto>(order);
+            dto.TotalPrice = totalPrice;
 
             await _ordersHub.Clients.User($"{NotificationConstants.UserPrefix}{order.UserId}").OrderUpdated(dto);
             await _ordersHub.Clients.User($"{NotificationConstants.CateringPrefix}{order.Positions.First().Option.CateringId}").OrderUpdated(dto);

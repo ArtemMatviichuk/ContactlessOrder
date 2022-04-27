@@ -186,7 +186,7 @@ namespace ContactlessOrder.BLL.Services
 
                 await _clientRepository.SaveChanges();
 
-                await _notificationService.NotifyOrderUpdated(dto.Id);
+                await _notificationService.NotifyOrderPaid(dto.Id, await _commonService.GetOrderTotalPrice(dto.Id, AppConstants.ViewAll));
             }
         }
 

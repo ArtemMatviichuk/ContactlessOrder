@@ -11,7 +11,7 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Orders
             builder.ToTable("OrderPositionModification");
             builder.Property(e => e.ModificationName).HasMaxLength(250);
 
-            builder.HasOne(e => e.Modification).WithMany().HasForeignKey(e => e.ModificationId);
+            builder.HasOne(e => e.Modification).WithMany().HasForeignKey(e => e.ModificationId).OnDelete(DeleteBehavior.SetNull);
             builder.HasOne(e => e.OrderPosition).WithMany(e => e.Modifications).HasForeignKey(e => e.OrderPositionId);
         }
     }

@@ -33,11 +33,13 @@ namespace ContactlessOrder.DAL.Migrations
 
             migrationBuilder.Sql(@"
 INSERT INTO [dbo].[OrderStatuses] (Name, Value)
-VALUES ('Нове', 1),
-       ('Оплачене', 2),
-       ('Готується', 3),
-       ('Готове', 4),
-       ('Завершене', 5);
+VALUES (N'Нове', 1),
+       (N'Оплачене', 2),
+       (N'Готується', 3),
+       (N'Готове', 4),
+       (N'Завершене', 5),
+       (N'На з''ясуванні', 6),
+       (N'Відмінене', 7);
 ");
         }
 

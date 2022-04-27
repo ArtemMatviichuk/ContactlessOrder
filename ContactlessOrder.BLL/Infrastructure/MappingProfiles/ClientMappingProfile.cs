@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ContactlessOrder.Common.Dto.Caterings;
 using ContactlessOrder.Common.Dto.Clients;
+using ContactlessOrder.Common.Dto.Common;
 using ContactlessOrder.Common.Dto.Companies;
 using ContactlessOrder.Common.Dto.Orders;
 using ContactlessOrder.DAL.Entities.Companies;
@@ -42,9 +43,9 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
             return new TimeDto() { Hour = data.Value.Hours, Minute = data.Value.Minutes };
         }
 
-        private static OrderPositionDto MapPosition(OrderPosition position)
+        private static OrderPositionWithModificationsDto MapPosition(OrderPosition position)
         {
-            return new OrderPositionDto()
+            return new OrderPositionWithModificationsDto()
             {
                 OptionId = position.Id,
                 OptionName = position.OptionId != null
@@ -52,6 +53,11 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
                     : position.OptionName,
                 Quantity = position.Quantity,
                 PictureId = position.Option?.MenuOption.MenuItem.Pictures.FirstOrDefault()?.Id,
+                Modifications = position.Modifications.Select(m => new IdNameDto()
+                    {
+                        Id = m.ModificationId.HasValue ? m.ModificationId.Value : default,
+                        Name = m.ModificationName ?? m.Modification.Name,
+                    }),
             };
         }
     }

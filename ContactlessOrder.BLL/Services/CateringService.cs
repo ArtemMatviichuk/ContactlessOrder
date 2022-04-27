@@ -1,9 +1,13 @@
 ﻿using AutoMapper;
 using ContactlessOrder.BLL.Interfaces;
+using ContactlessOrder.Common.Constants;
 using ContactlessOrder.Common.Dto.Caterings;
+using ContactlessOrder.Common.Dto.Common;
 using ContactlessOrder.Common.Dto.Orders;
 using ContactlessOrder.DAL.Entities.Companies;
+using ContactlessOrder.DAL.Entities.Orders;
 using ContactlessOrder.DAL.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,15 +16,17 @@ namespace ContactlessOrder.BLL.Services
 {
     public class CateringService : ICateringService
     {
+        private readonly INotificationService _notificationService;
         private readonly ICommonService _commonService;
         private readonly ICateringRepository _cateringRepository;
         private readonly IMapper _mapper;
 
-        public CateringService(ICateringRepository cateringRepository, IMapper mapper, ICommonService commonService)
+        public CateringService(ICateringRepository cateringRepository, IMapper mapper, ICommonService commonService, INotificationService notificationService)
         {
             _cateringRepository = cateringRepository;
             _mapper = mapper;
             _commonService = commonService;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<CateringMenuOptionDto>> GetMenu(int cateringId)
@@ -55,7 +61,17 @@ namespace ContactlessOrder.BLL.Services
 
             var dtos = _mapper.Map<IEnumerable<OrderDto>>(orders);
 
-            return dtos;
+            foreach (var item in dtos)
+            {
+                item.TotalPrice = await _commonService.GetOrderTotalPrice(item.Id, AppConstants.ViewAll);
+            }
+
+            return dtos.OrderBy(e => e.StatusValue == OrderStatuses.DoneStatusValue)
+                .ThenBy(e => e.StatusValue == OrderStatuses.RejectedStatusValue)
+                .ThenBy(e => e.StatusValue == OrderStatuses.ReadyStatusValue)
+                .ThenBy(e => e.StatusValue == OrderStatuses.OnHoldStatusValue)
+                .ThenBy(e => e.StatusValue == OrderStatuses.InProgressStatusValue)
+                .ThenBy(e => e.StatusValue == OrderStatuses.PaidStatusValue);
         }
 
         public async Task<IEnumerable<CateringModificationDto>> GetModifications(int cateringId)
@@ -88,6 +104,37 @@ namespace ContactlessOrder.BLL.Services
             }
 
             await _cateringRepository.SaveChanges();
+        }
+
+        public async Task<IEnumerable<IdNameValueDto>> GetOrderStatuses()
+        {
+            var statuses = await _cateringRepository.GetAll<OrderStatus>();
+            var dtos = _mapper.Map<IEnumerable<IdNameValueDto>>(statuses);
+            return dtos;
+        }
+
+        public async Task UpdateOrderStatus(int orderId, int statusId)
+        {
+            var order = await _cateringRepository.Get<Order>(orderId);
+
+            if (order != null)
+            {
+                var status = await _cateringRepository.Get<OrderStatus>(statusId);
+                if (status != null)
+                {
+                    order.StatusId = statusId;
+                    order.ModifiedDate = DateTime.Now;
+
+                    await _cateringRepository.SaveChanges();
+
+                    await _notificationService.NotifyOrderUpdated(orderId);
+
+                    if (status.Value == OrderStatuses.ReadyStatusValue)
+                    {
+                        await _notificationService.NotifyOrderReady(orderId);
+                    }
+                }
+            }
         }
     }
 }

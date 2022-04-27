@@ -1,4 +1,5 @@
 ﻿using ContactlessOrder.Common.Dto.Caterings;
+using ContactlessOrder.Common.Dto.Common;
 using ContactlessOrder.Common.Dto.Orders;
 using System;
 using System.Collections.Generic;
@@ -16,5 +17,7 @@ namespace ContactlessOrder.BLL.Interfaces
 
         Task<IEnumerable<CateringModificationDto>> GetModifications(int cateringId);
         Task UpdateModification(int id, int cateringId, UpdateCateringMenuOptionDto dto);
+        Task<IEnumerable<IdNameValueDto>> GetOrderStatuses();
+        Task UpdateOrderStatus(int orderId, int statusId);
     }
 }

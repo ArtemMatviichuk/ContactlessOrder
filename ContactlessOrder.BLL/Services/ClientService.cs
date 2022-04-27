@@ -172,7 +172,6 @@ namespace ContactlessOrder.BLL.Services
 
                 foreach (var position in order.Positions)
                 {
-                    position.OptionId = null;
                     position.OptionName = $"{position.Option.MenuOption.MenuItem.Name} ({ position.Option.MenuOption.Name})";
                     position.InMomentPrice = position.Option.InheritPrice
                         ? position.Option.MenuOption.Price
@@ -182,7 +181,6 @@ namespace ContactlessOrder.BLL.Services
                     {
                         modification.InMomentPrice = modifications.First(m => m.Id == modification.ModificationId).Price;
                         modification.ModificationName = modification.Modification.Name;
-                        modification.ModificationId = null;
                     }
                 }
 
@@ -192,32 +190,9 @@ namespace ContactlessOrder.BLL.Services
             }
         }
 
-        public async Task<int> GetOrderTotalPrice(int id, int userId)
+        public Task<int> GetOrderTotalPrice(int id, int userId)
         {
-            var order = await _clientRepository.GetOrder(id);
-
-            if (order != null && order.UserId == userId)
-            {
-                if (order.Status.Value != OrderStatuses.CreatedStatusValue)
-                {
-                    return order.Positions.Select(e =>
-                    (e.InMomentPrice + e.Modifications.Select(m => m.InMomentPrice).Sum())
-                        * e.Quantity).Sum();
-                }
-
-                var cateringId = order.Positions.First().Option.CateringId;
-                var modifications = await _commonService.GetCateringModifications(cateringId);
-
-                return order.Positions.Select(e =>
-                ((e.Option.InheritPrice
-                    ? e.Option.MenuOption.Price
-                    : e.Option.Price.Value) +
-                  e.Modifications.Select(m =>
-                    modifications.First(cm => cm.Id == m.ModificationId)
-                        .Price).Sum()) * e.Quantity).Sum();
-            }
-
-            return -1;
+            return _commonService.GetOrderTotalPrice(id, userId);
         }
     }
 }

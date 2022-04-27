@@ -25,5 +25,7 @@
         public const string CorsOrigin = "CorsOrigin";
 
         public const string FilePath = "FilePath";
+
+        public const int ViewAll = -1;
     }
 }

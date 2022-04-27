@@ -32,5 +32,11 @@ namespace ContactlessOrder.BLL.Services
             await _ordersHub.Clients.User($"{NotificationConstants.UserPrefix}{order.UserId}").OrderUpdated(dto);
             await _ordersHub.Clients.User($"{NotificationConstants.CateringPrefix}{order.Positions.First().Option.CateringId}").OrderUpdated(dto);
         }
+
+        public async Task NotifyOrderReady(int id)
+        {
+            var order = await _clientRepository.GetOrder(id);
+            await _ordersHub.Clients.User($"{NotificationConstants.UserPrefix}{order.UserId}").OrderReady($"#{order.Id:d16}");
+        }
     }
 }

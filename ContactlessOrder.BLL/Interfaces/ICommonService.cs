@@ -7,5 +7,6 @@ namespace ContactlessOrder.BLL.Interfaces
     public interface ICommonService
     {
         Task<IEnumerable<CateringModificationDto>> GetCateringModifications(int cateringId);
+        Task<int> GetOrderTotalPrice(int id, int userId);
     }
 }

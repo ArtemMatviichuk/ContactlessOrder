@@ -6,5 +6,6 @@ namespace ContactlessOrder.BLL.HubConnections.HubClients
     public interface IOrdersHubClient
     {
         Task OrderUpdated(OrderDto dto);
+        Task OrderReady(string orderId);
     }
 }

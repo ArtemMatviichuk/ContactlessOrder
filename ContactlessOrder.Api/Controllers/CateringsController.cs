@@ -1,6 +1,7 @@
 ﻿using ContactlessOrder.BLL.Interfaces;
 using ContactlessOrder.Common.Constants;
 using ContactlessOrder.Common.Dto.Caterings;
+using ContactlessOrder.Common.Dto.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -68,6 +69,22 @@ namespace ContactlessOrder.Api.Controllers
         {
             int cateringId = int.Parse(User.FindFirstValue(TokenProperties.CateringId));
             await _cateringService.UpdateModification(id, cateringId, dto);
+
+            return Ok();
+        }
+        
+        [HttpGet("OrderStatuses")]
+        public async Task<IActionResult> GetOrderStatuses()
+        {
+            var statuses = await _cateringService.GetOrderStatuses();
+
+            return Ok(statuses);
+        }
+
+        [HttpPut("Orders/{id}/Status")]
+        public async Task<IActionResult> UpdateOrderStatus(int id, ValueDto<int> dto)
+        {
+            await _cateringService.UpdateOrderStatus(id, dto.Value);
 
             return Ok();
         }

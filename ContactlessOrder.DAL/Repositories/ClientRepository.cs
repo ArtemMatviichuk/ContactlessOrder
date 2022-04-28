@@ -22,6 +22,8 @@ namespace ContactlessOrder.DAL.Repositories
             return await Context.Set<Catering>()
                 .Include(e => e.Coordinates)
                 .Include(e => e.Company)
+                .Include(e => e.MenuOptions)
+                .ThenInclude(e => e.MenuOption.MenuItem)
                 .Where(e => e.Coordinates.Lat >= from.Lat && e.Coordinates.Lat <= to.Lat
                     && e.Coordinates.Lng >= from.Lng && e.Coordinates.Lng <= to.Lng)
                 .ToListAsync();

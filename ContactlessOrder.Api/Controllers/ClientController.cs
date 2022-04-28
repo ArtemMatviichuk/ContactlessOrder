@@ -24,9 +24,9 @@ namespace ContactlessOrder.Api.Controllers
         }
 
         [HttpGet("Caterings")]
-        public async Task<IActionResult> GetCaterings([FromQuery] GetCateringsDto dto)
+        public async Task<IActionResult> GetCaterings([FromQuery] GetCateringsDto dto, string search = null)
         {
-            var caterings = await _clientService.GetCaterings(dto);
+            var caterings = await _clientService.GetCaterings(dto, search);
 
             return Ok(caterings);
         }

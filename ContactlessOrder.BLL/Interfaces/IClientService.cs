@@ -9,7 +9,7 @@ namespace ContactlessOrder.BLL.Interfaces
 {
     public interface IClientService
     {
-        Task<IEnumerable<ClientCateringDto>> GetCaterings(GetCateringsDto dto);
+        Task<IEnumerable<ClientCateringDto>> GetCaterings(GetCateringsDto dto, string search);
         Task<IEnumerable<ClientMenuPositionDto>> GetCateringMenu(int cateringId);
         Task<IEnumerable<CartOptionDto>> GetCartData(IEnumerable<GetCartDto> itemIds);
         Task<IEnumerable<AttachmentDto>> GetMenuPictures(int id);

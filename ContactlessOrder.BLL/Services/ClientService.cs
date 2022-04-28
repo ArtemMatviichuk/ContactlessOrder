@@ -38,9 +38,15 @@ namespace ContactlessOrder.BLL.Services
             _commonService = commonService;
         }
 
-        public async Task<IEnumerable<ClientCateringDto>> GetCaterings(GetCateringsDto dto)
+        public async Task<IEnumerable<ClientCateringDto>> GetCaterings(GetCateringsDto dto, string search)
         {
             var caterings = await _clientRepository.GetCateringsByCoordinates(dto.From, dto.To);
+            
+            if (!string.IsNullOrEmpty(search))
+            {
+                caterings = DoFilter(caterings, search);
+            }
+
             var dtos = _mapper.Map<IEnumerable<ClientCateringDto>>(caterings);
 
             return dtos;
@@ -193,6 +199,17 @@ namespace ContactlessOrder.BLL.Services
         public Task<int> GetOrderTotalPrice(int id, int userId)
         {
             return _commonService.GetOrderTotalPrice(id, userId);
+        }
+
+        private IEnumerable<Catering> DoFilter(IEnumerable<Catering> caterings, string search)
+        {
+            var lowerSearch = search.ToLower();
+            return caterings.Where(catering => (catering.Company.Name ?? string.Empty).ToLower().Contains(lowerSearch)
+                || (catering.Company.Description ?? string.Empty).ToLower().Contains(lowerSearch)
+                || (catering.Name ?? string.Empty).ToLower().Contains(lowerSearch)
+                || (catering.Services ?? string.Empty).ToLower().Contains(lowerSearch)
+                || catering.MenuOptions.Select(e => e.MenuOption.MenuItem.Name?.ToLower()).Any(e => e.Contains(lowerSearch)))
+                .ToList();
         }
     }
 }

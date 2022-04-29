@@ -126,6 +126,13 @@ namespace ContactlessOrder.BLL.Services
             return dtos;
         }
 
+        public async Task<IEnumerable<IdNameValueDto>> GetPaymentMethods()
+        {
+            var items = await _clientRepository.GetAll<PaymentMethod>();
+            var dtos = _mapper.Map<IEnumerable<IdNameValueDto>>(items);
+            return dtos;
+        }
+
         public async Task<IEnumerable<AttachmentDto>> GetMenuPictures(int id)
         {
             var pictures = await _cateringRepository.GetMenuItemPictures(id);
@@ -135,9 +142,17 @@ namespace ContactlessOrder.BLL.Services
             return dtos;
         }
 
-        public async Task<int> CreateOrder(int userId, CreateOrderDto dto)
+        public async Task<ResponseDto<int>> CreateOrder(int userId, CreateOrderDto dto)
         {
+            var notFinishedOrders = await _clientRepository.GetNotFinishedOrders(userId);
+
+            if (notFinishedOrders.Count() >= AppConstants.NotFinishedThreshold)
+            {
+                return new ResponseDto<int>() { ErrorMessage = "Досягнутий ліміт незавершених замовлень" };
+            }
+
             var status = await _clientRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.CreatedStatusValue);
+            var payment = await _clientRepository.Get<PaymentMethod>(e => e.Value == dto.PaymentMethodValue);
 
             Order order = new ()
             {
@@ -145,6 +160,7 @@ namespace ContactlessOrder.BLL.Services
                 StatusId = status.Id,
                 UserId = userId,
                 CreatedDate = DateTime.Now,
+                PaymentMethodId = payment.Id,
                 Positions = dto.Positions.Select(p => new OrderPosition()
                 {
                     Quantity = p.Quantity,
@@ -159,7 +175,12 @@ namespace ContactlessOrder.BLL.Services
             await _clientRepository.Add(order);
             await _clientRepository.SaveChanges();
 
-            return order.Id;
+            if (dto.PaymentMethodValue == PaymentMethods.Cash)
+            {
+                await OrderPaid(new IdNameDto() { Id = order.Id, Name = null });
+            }
+
+            return new ResponseDto<int>() { Response = order.Id };
         }
 
         public async Task OrderPaid(IdNameDto dto)
@@ -168,7 +189,7 @@ namespace ContactlessOrder.BLL.Services
 
             if (order != null)
             {
-                var status = await _clientRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.PaidStatusValue);
+                var status = await _clientRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.PendingStartStatusValue);
                 order.StatusId = status.Id;
                 order.PaymentNumber = dto.Name;
                 order.ModifiedDate = DateTime.Now;
@@ -194,6 +215,24 @@ namespace ContactlessOrder.BLL.Services
 
                 await _notificationService.NotifyOrderPaid(dto.Id, await _commonService.GetOrderTotalPrice(dto.Id, AppConstants.ViewAll));
             }
+        }
+
+        public async Task RejectOrder(int id, int userId)
+        {
+            var order = await _cateringRepository.Get<Order>(id);
+
+            if (order == null || order.UserId != userId)
+            {
+                return;
+            }
+
+            var status = await _cateringRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.RejectedStatusValue);
+            order.StatusId = status.Id;
+            order.ModifiedDate = DateTime.Now;
+
+            await _cateringRepository.SaveChanges();
+
+            await _notificationService.NotifyOrderRejected(id, await _commonService.GetOrderTotalPrice(id, AppConstants.ViewAll));
         }
 
         public Task<int> GetOrderTotalPrice(int id, int userId)

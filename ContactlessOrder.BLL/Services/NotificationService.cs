@@ -49,5 +49,15 @@ namespace ContactlessOrder.BLL.Services
             var order = await _clientRepository.GetOrder(id);
             await _ordersHub.Clients.User($"{NotificationConstants.UserPrefix}{order.UserId}").OrderReady($"#{order.Id:d16}");
         }
+
+        public async Task NotifyOrderRejected(int id, int totalPrice)
+        {
+            var order = await _clientRepository.GetOrder(id);
+            var dto = _mapper.Map<OrderDto>(order);
+            dto.TotalPrice = totalPrice;
+
+            await _ordersHub.Clients.User($"{NotificationConstants.UserPrefix}{order.UserId}").OrderUpdated(dto);
+            await _ordersHub.Clients.User($"{NotificationConstants.CateringPrefix}{order.Positions.First().Option.CateringId}").OrderRejected(id);
+        }
     }
 }

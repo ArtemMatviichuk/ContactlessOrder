@@ -6,6 +6,7 @@ namespace ContactlessOrder.Common.Dto.Orders
     {
         public int CateringId { get; set; }
         public string Comment { get; set; }
+        public int PaymentMethodValue { get; set; }
 
         public IEnumerable<OrderPositionDto> Positions { get; set; }
     }

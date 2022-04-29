@@ -14,6 +14,8 @@ namespace ContactlessOrder.DAL.Entities.Orders
         public OrderStatus Status { get; set; }
         public int UserId { get; set; }
         public User User { get; set; }
+        public int PaymentMethodId { get; set; }
+        public PaymentMethod PaymentMethod { get; set; }
 
         public DateTime CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }

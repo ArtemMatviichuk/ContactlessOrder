@@ -1,4 +1,5 @@
-﻿using ContactlessOrder.Common.Dto.Caterings;
+﻿using ContactlessOrder.Common.Constants;
+using ContactlessOrder.Common.Dto.Caterings;
 using ContactlessOrder.DAL.EF;
 using ContactlessOrder.DAL.Entities.Companies;
 using ContactlessOrder.DAL.Entities.Orders;
@@ -33,6 +34,8 @@ namespace ContactlessOrder.DAL.Repositories
         {
             return await Context.Set<Order>()
                 .Include(e => e.Status)
+                .Include(e => e.User)
+                .Include(e => e.PaymentMethod)
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Option.MenuOption.MenuItem.Pictures)
                 .Include(e => e.Positions)
@@ -45,12 +48,24 @@ namespace ContactlessOrder.DAL.Repositories
         {
             return await Context.Set<Order>()
                 .Include(e => e.Status)
+                .Include(e => e.User)
+                .Include(e => e.PaymentMethod)
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Option.MenuOption.MenuItem.Pictures)
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Modifications)
                 .ThenInclude(e => e.Modification)
                 .Where(e => e.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetNotFinishedOrders(int userId)
+        {
+            return await Context.Set<Order>()
+                .Include(e => e.Status)
+                .Where(e => e.UserId == userId
+                    && e.Status.Value != OrderStatuses.DoneStatusValue
+                    && e.Status.Value != OrderStatuses.RejectedStatusValue)
                 .ToListAsync();
         }
     }

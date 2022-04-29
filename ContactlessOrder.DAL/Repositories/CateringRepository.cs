@@ -56,13 +56,17 @@ namespace ContactlessOrder.DAL.Repositories
         {
             return await Context.Set<Order>()
                 .Include(e => e.Status)
+                .Include(e => e.User)
+                .Include(e => e.PaymentMethod)
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Option.MenuOption.MenuItem.Pictures)
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Modifications)
                 .ThenInclude(e => e.Modification)
                 .Where(e => e.Positions.Select(e => e.Option.CateringId).FirstOrDefault() == cateringId
-                    && e.Status.Value > OrderStatuses.CreatedStatusValue)
+                    && e.Status.Value != OrderStatuses.CreatedStatusValue
+                    && e.Status.Value != OrderStatuses.RejectedStatusValue
+                    && e.Status.Value != OrderStatuses.DoneStatusValue)
                 .ToListAsync();
         }
 

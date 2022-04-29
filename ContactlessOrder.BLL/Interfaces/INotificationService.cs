@@ -6,6 +6,7 @@ namespace ContactlessOrder.BLL.Interfaces
     {
         Task NotifyOrderPaid(int id, int totalPrice);
         Task NotifyOrderUpdated(int id, int totalPrice);
-        Task NotifyOrderReady(int id);
+        Task NotifyOrderReady(int id); 
+        Task NotifyOrderRejected(int id, int totalPrice);
     }
 }

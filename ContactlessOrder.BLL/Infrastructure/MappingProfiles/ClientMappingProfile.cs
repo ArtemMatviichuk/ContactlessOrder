@@ -2,7 +2,6 @@
 using ContactlessOrder.Common.Dto.Caterings;
 using ContactlessOrder.Common.Dto.Clients;
 using ContactlessOrder.Common.Dto.Common;
-using ContactlessOrder.Common.Dto.Companies;
 using ContactlessOrder.Common.Dto.Orders;
 using ContactlessOrder.DAL.Entities.Companies;
 using ContactlessOrder.DAL.Entities.Orders;
@@ -15,6 +14,7 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
     {
         public ClientMappingProfile()
         {
+            CreateMap<PaymentMethod, IdNameValueDto>();
             CreateMap<Catering, ClientCateringDto>()
                 .ForMember(e => e.Label, opt => opt.MapFrom(e => e.Company.Name))
                 .ForMember(e => e.OpenTime, opt => opt.MapFrom(e => MapToTimeDto(e.OpenTime)))

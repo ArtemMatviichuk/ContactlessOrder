@@ -27,5 +27,6 @@
         public const string FilePath = "FilePath";
 
         public const int ViewAll = -1;
+        public const int NotFinishedThreshold = 3; 
     }
 }

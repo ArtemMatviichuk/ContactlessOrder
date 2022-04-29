@@ -12,6 +12,7 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Orders
 
             builder.HasOne(e => e.Status).WithMany().HasForeignKey(e => e.StatusId);
             builder.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.NoAction);
+            builder.HasOne(e => e.PaymentMethod).WithMany().HasForeignKey(e => e.PaymentMethodId).OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

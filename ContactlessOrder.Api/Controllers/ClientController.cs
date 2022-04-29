@@ -68,15 +68,29 @@ namespace ContactlessOrder.Api.Controllers
         public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
         {
             int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
-            int id = await _clientService.CreateOrder(userId, dto);
+            var response = await _clientService.CreateOrder(userId, dto);
 
-            return Ok(id);
+            if (!string.IsNullOrEmpty(response.ErrorMessage))
+            {
+                return BadRequest(new { message = response.ErrorMessage });
+            }
+
+            return Ok(response.Response);
         }
 
         [HttpPut("Order")]
         public async Task<IActionResult> OrderPaid(IdNameDto dto)
         {
             await _clientService.OrderPaid(dto);
+
+            return Ok();
+        }
+
+        [HttpPut("Order/{id}/Reject")]
+        public async Task<IActionResult> RejectOrder(int id)
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            await _clientService.RejectOrder(id, userId);
 
             return Ok();
         }
@@ -93,6 +107,14 @@ namespace ContactlessOrder.Api.Controllers
             }
 
             return Ok(totalPrice);
+        }
+
+        [HttpGet("PaymentMethods")]
+        public async Task<IActionResult> GetPaymentMethods()
+        {
+            var methods = await _clientService.GetPaymentMethods();
+
+            return Ok(methods);
         }
     }
 }

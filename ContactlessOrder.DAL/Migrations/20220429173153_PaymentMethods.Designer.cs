@@ -4,6 +4,7 @@ using ContactlessOrder.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContactlessOrder.DAL.Migrations
 {
     [DbContext(typeof(ContactlessOrderContext))]
-    partial class ContactlessOrderContextModelSnapshot : ModelSnapshot
+    [Migration("20220429173153_PaymentMethods")]
+    partial class PaymentMethods
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,6 +140,29 @@ namespace ContactlessOrder.DAL.Migrations
                     b.HasIndex("ModificationId");
 
                     b.ToTable("CateringModifications", (string)null);
+                });
+
+            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.CateringPaymentMethod", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<int>("CateringId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PaymentMethodId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CateringId");
+
+                    b.HasIndex("PaymentMethodId");
+
+                    b.ToTable("CateringPaymentMethods", (string)null);
                 });
 
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.Company", b =>
@@ -577,6 +602,25 @@ namespace ContactlessOrder.DAL.Migrations
                     b.Navigation("Modification");
                 });
 
+            modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.CateringPaymentMethod", b =>
+                {
+                    b.HasOne("ContactlessOrder.DAL.Entities.Companies.Catering", "Catering")
+                        .WithMany("PaymentMethods")
+                        .HasForeignKey("CateringId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ContactlessOrder.DAL.Entities.Orders.PaymentMethod", "PaymentMethod")
+                        .WithMany()
+                        .HasForeignKey("PaymentMethodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Catering");
+
+                    b.Navigation("PaymentMethod");
+                });
+
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.Company", b =>
                 {
                     b.HasOne("ContactlessOrder.DAL.Entities.Users.User", "User")
@@ -719,6 +763,8 @@ namespace ContactlessOrder.DAL.Migrations
                     b.Navigation("CateringModifications");
 
                     b.Navigation("MenuOptions");
+
+                    b.Navigation("PaymentMethods");
                 });
 
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.Company", b =>

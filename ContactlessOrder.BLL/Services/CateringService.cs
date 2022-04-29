@@ -66,12 +66,10 @@ namespace ContactlessOrder.BLL.Services
                 item.TotalPrice = await _commonService.GetOrderTotalPrice(item.Id, AppConstants.ViewAll);
             }
 
-            return dtos.OrderBy(e => e.StatusValue == OrderStatuses.DoneStatusValue)
-                .ThenBy(e => e.StatusValue == OrderStatuses.RejectedStatusValue)
-                .ThenBy(e => e.StatusValue == OrderStatuses.ReadyStatusValue)
+            return dtos.OrderBy(e => e.StatusValue == OrderStatuses.ReadyStatusValue)
                 .ThenBy(e => e.StatusValue == OrderStatuses.OnHoldStatusValue)
                 .ThenBy(e => e.StatusValue == OrderStatuses.InProgressStatusValue)
-                .ThenBy(e => e.StatusValue == OrderStatuses.PaidStatusValue);
+                .ThenBy(e => e.StatusValue == OrderStatuses.PendingStartStatusValue);
         }
 
         public async Task<IEnumerable<CateringModificationDto>> GetModifications(int cateringId)

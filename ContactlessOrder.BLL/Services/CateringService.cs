@@ -59,17 +59,18 @@ namespace ContactlessOrder.BLL.Services
         {
             var orders = await _cateringRepository.GetOrders(cateringId);
 
-            var dtos = _mapper.Map<IEnumerable<OrderDto>>(orders);
+            return await MapOrders(orders.Where(e => e.Status.Value != OrderStatuses.CreatedStatusValue
+                    && e.Status.Value != OrderStatuses.RejectedStatusValue
+                    && e.Status.Value != OrderStatuses.DoneStatusValue));
+        }
 
-            foreach (var item in dtos)
-            {
-                item.TotalPrice = await _commonService.GetOrderTotalPrice(item.Id, AppConstants.ViewAll);
-            }
+        public async Task<IEnumerable<OrderDto>> GetEndedOrders(int cateringId)
+        {
+            var orders = await _cateringRepository.GetOrders(cateringId);
 
-            return dtos.OrderBy(e => e.StatusValue == OrderStatuses.ReadyStatusValue)
-                .ThenBy(e => e.StatusValue == OrderStatuses.OnHoldStatusValue)
-                .ThenBy(e => e.StatusValue == OrderStatuses.InProgressStatusValue)
-                .ThenBy(e => e.StatusValue == OrderStatuses.PendingStartStatusValue);
+            return await MapOrders(orders.Where(e =>
+                    e.Status.Value == OrderStatuses.RejectedStatusValue
+                    || e.Status.Value == OrderStatuses.DoneStatusValue));
         }
 
         public async Task<IEnumerable<CateringModificationDto>> GetModifications(int cateringId)
@@ -133,6 +134,22 @@ namespace ContactlessOrder.BLL.Services
                     }
                 }
             }
+        }
+
+        private async Task<IEnumerable<OrderDto>> MapOrders(IEnumerable<Order> orders)
+        {
+            var dtos = _mapper.Map<IEnumerable<OrderDto>>(orders);
+
+            foreach (var item in dtos)
+            {
+                item.TotalPrice = await _commonService.GetOrderTotalPrice(item.Id, AppConstants.ViewAll);
+            }
+
+            return dtos.OrderBy(e => e.StatusValue == OrderStatuses.ReadyStatusValue)
+                .ThenBy(e => e.StatusValue == OrderStatuses.OnHoldStatusValue)
+                .ThenBy(e => e.StatusValue == OrderStatuses.InProgressStatusValue)
+                .ThenBy(e => e.StatusValue == OrderStatuses.PendingStartStatusValue)
+                .ThenByDescending(e => e.CreatedDate);
         }
     }
 }

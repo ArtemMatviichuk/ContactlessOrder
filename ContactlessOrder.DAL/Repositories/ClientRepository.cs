@@ -68,5 +68,14 @@ namespace ContactlessOrder.DAL.Repositories
                     && e.Status.Value != OrderStatuses.RejectedStatusValue)
                 .ToListAsync();
         }
+
+        public async Task<Catering> GetCatering(int id)
+        {
+            return await Context.Set<Catering>()
+                .Include(e => e.Company)
+                .Include(e => e.Coordinates)
+                .Include(e => e.MenuOptions)
+                .FirstOrDefaultAsync(e => e.Id == id);
+        }
     }
 }

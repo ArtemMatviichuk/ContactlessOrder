@@ -15,5 +15,6 @@ namespace ContactlessOrder.DAL.Interfaces
         Task<Order> GetOrder(int id);
         Task<IEnumerable<Order>> GetOrders(int userId);
         Task<IEnumerable<Order>> GetNotFinishedOrders(int userId);
+        Task<Catering> GetCatering(int id);
     }
 }

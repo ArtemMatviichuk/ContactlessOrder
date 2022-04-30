@@ -63,10 +63,7 @@ namespace ContactlessOrder.DAL.Repositories
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Modifications)
                 .ThenInclude(e => e.Modification)
-                .Where(e => e.Positions.Select(e => e.Option.CateringId).FirstOrDefault() == cateringId
-                    && e.Status.Value != OrderStatuses.CreatedStatusValue
-                    && e.Status.Value != OrderStatuses.RejectedStatusValue
-                    && e.Status.Value != OrderStatuses.DoneStatusValue)
+                .Where(e => e.Positions.Select(e => e.Option.CateringId).FirstOrDefault() == cateringId)
                 .ToListAsync();
         }
 

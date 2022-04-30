@@ -55,6 +55,15 @@ namespace ContactlessOrder.Api.Controllers
             return Ok(menu);
         }
 
+        [HttpGet("EndedOrders")]
+        public async Task<IActionResult> GetEndedOrders()
+        {
+            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.CateringId));
+            var menu = await _cateringService.GetEndedOrders(cateringId);
+
+            return Ok(menu);
+        }
+
         [HttpGet("Modifications")]
         public async Task<IActionResult> GetModifications()
         {

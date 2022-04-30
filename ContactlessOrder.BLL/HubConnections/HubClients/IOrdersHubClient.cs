@@ -8,6 +8,7 @@ namespace ContactlessOrder.BLL.HubConnections.HubClients
         Task OrderUpdated(OrderDto dto);
         Task OrderReady(string orderId);
         Task OrderPaid(OrderDto dto);
-        Task OrderRejected(int id);
+        Task OrderRejected(OrderDto dto);
+        Task OrderCompleted(OrderDto dto);
     }
 }

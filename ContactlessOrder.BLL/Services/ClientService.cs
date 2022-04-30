@@ -15,6 +15,7 @@ using ContactlessOrder.Common.Constants;
 using ContactlessOrder.BLL.HubConnections.HubClients;
 using ContactlessOrder.BLL.HubConnections.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using ContactlessOrder.Common.Dto.Caterings;
 
 namespace ContactlessOrder.BLL.Services
 {
@@ -76,7 +77,7 @@ namespace ContactlessOrder.BLL.Services
                         .Select(e => e.ModificationId)
                         .Contains(m.Id))
                         .OrderBy(e => e.Price),
-                });
+                }).OrderBy(e => e.Name);
 
             return dtos;
         }
@@ -235,9 +236,34 @@ namespace ContactlessOrder.BLL.Services
             await _notificationService.NotifyOrderRejected(id, await _commonService.GetOrderTotalPrice(id, AppConstants.ViewAll));
         }
 
+        public async Task CompleteOrder(int id, int userId)
+        {
+            var order = await _cateringRepository.Get<Order>(id);
+
+            if (order == null || order.UserId != userId)
+            {
+                return;
+            }
+
+            var status = await _cateringRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.DoneStatusValue);
+            order.StatusId = status.Id;
+            order.ModifiedDate = DateTime.Now;
+
+            await _cateringRepository.SaveChanges();
+
+            await _notificationService.NotifyOrderCompleted(id, await _commonService.GetOrderTotalPrice(id, AppConstants.ViewAll));
+        }
+
         public Task<int> GetOrderTotalPrice(int id, int userId)
         {
             return _commonService.GetOrderTotalPrice(id, userId);
+        }
+
+        public async Task<CateringDto> GetCatering(int orderId)
+        {
+            var order = await _clientRepository.GetOrder(orderId);
+            var catering = await _clientRepository.GetCatering(order.Positions.First().Option.CateringId);
+            return _mapper.Map<CateringDto>(catering);
         }
 
         private IEnumerable<Catering> DoFilter(IEnumerable<Catering> caterings, string search)

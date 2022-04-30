@@ -95,6 +95,15 @@ namespace ContactlessOrder.Api.Controllers
             return Ok();
         }
 
+        [HttpPut("Order/{id}/Complete")]
+        public async Task<IActionResult> CompleteOrder(int id)
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            await _clientService.CompleteOrder(id, userId);
+
+            return Ok();
+        }
+
         [HttpGet("Order/{id}/TotalPrice")]
         public async Task<IActionResult> GetOrderTotalPrice(int id)
         {
@@ -115,6 +124,14 @@ namespace ContactlessOrder.Api.Controllers
             var methods = await _clientService.GetPaymentMethods();
 
             return Ok(methods);
+        }
+
+        [HttpGet("Caterings/{orderId}")]
+        public async Task<IActionResult> GetCatering(int orderId)
+        {
+            var catering = await _clientService.GetCatering(orderId);
+
+            return Ok(catering);
         }
     }
 }

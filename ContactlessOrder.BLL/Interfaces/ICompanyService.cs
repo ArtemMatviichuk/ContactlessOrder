@@ -32,5 +32,8 @@ namespace ContactlessOrder.BLL.Interfaces
         Task CreateModification(int userId, ValueDto<IEnumerable<NamePriceDto>> dto);
         Task UpdateModification(int id, NamePriceDto dto);
         Task DeleteModification(int id);
+
+        Task<PaymentDataDto> GetCompanyPaymentData(int userId);
+        Task UpdateCompanyPaymentData(int userId, PaymentDataDto dto);
     }
 }

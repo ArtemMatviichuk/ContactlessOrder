@@ -35,6 +35,7 @@ namespace ContactlessOrder.DAL.Repositories
         {
             return await Context.Set<Company>()
                 .Include(e => e.User)
+                .Include(e => e.PaymentData)
                 .FirstOrDefaultAsync(e => e.UserId == userId);
         }
 

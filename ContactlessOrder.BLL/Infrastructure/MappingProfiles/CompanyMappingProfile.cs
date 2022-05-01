@@ -16,9 +16,11 @@ namespace ContactlessOrder.BLL.Infrastructure.MappingProfiles
                 .ForMember(e => e.Email, opt => opt.MapFrom(e => e.User.Email))
                 .ForMember(e => e.PhoneNumber, opt => opt.MapFrom(e => e.User.PhoneNumber))
                 .ForMember(e => e.RegisteredDate, opt => opt.MapFrom(e => e.User.RegistrationDate))
-                .ForMember(e => e.ModifiedDate, opt => opt.MapFrom(e => e.User.ModifiedDate));
+                .ForMember(e => e.ModifiedDate, opt => opt.MapFrom(e => e.User.ModifiedDate))
+                .ForMember(e => e.ApprovedByName, opt => opt.MapFrom(e => $"{e.ApprovedBy.FirstName} {e.ApprovedBy.LastName}"));
 
             CreateMap<Coordinate, CoordinateDto>().ReverseMap();
+            CreateMap<PaymentData, PaymentDataDto>().ReverseMap();
 
             CreateMap<CreateCateringDto, Catering>()
                 .ForMember(e => e.OpenTime, opt => opt.MapFrom(e => MapToTimeSpan(e.OpenTime)))

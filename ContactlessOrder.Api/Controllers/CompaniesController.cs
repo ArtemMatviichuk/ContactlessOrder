@@ -210,5 +210,23 @@ namespace ContactlessOrder.Api.Controllers
 
             return Ok();
         }
+
+        [HttpGet("PaymentData")]
+        public async Task<IActionResult> GetCompanyPaymentData()
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            var data = await _companyService.GetCompanyPaymentData(userId);
+
+            return Ok(data);
+        }
+
+        [HttpPut("PaymentData")]
+        public async Task<IActionResult> UpdateCompanyPaymentData([FromBody] PaymentDataDto dto)
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            await _companyService.UpdateCompanyPaymentData(userId, dto);
+
+            return Ok();
+        }
     }
 }

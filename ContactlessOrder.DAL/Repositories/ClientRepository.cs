@@ -25,7 +25,8 @@ namespace ContactlessOrder.DAL.Repositories
                 .Include(e => e.Company)
                 .Include(e => e.MenuOptions)
                 .ThenInclude(e => e.MenuOption.MenuItem)
-                .Where(e => e.Coordinates.Lat >= from.Lat && e.Coordinates.Lat <= to.Lat
+                .Where(e => e.Company.ApprovedDate.HasValue
+                    && e.Coordinates.Lat >= from.Lat && e.Coordinates.Lat <= to.Lat
                     && e.Coordinates.Lng >= from.Lng && e.Coordinates.Lng <= to.Lng)
                 .ToListAsync();
         }

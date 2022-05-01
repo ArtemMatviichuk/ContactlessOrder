@@ -1,7 +1,6 @@
 ﻿using ContactlessOrder.DAL.Entities.Companies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
 
 namespace ContactlessOrder.DAL.EF.EntityConfigurations.Companies
 {
@@ -17,6 +16,11 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Companies
             builder.HasOne(e => e.User)
                 .WithOne(e => e.Company)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(e => e.ApprovedBy)
+                .WithMany()
+                .HasForeignKey(e => e.ApprovedById)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

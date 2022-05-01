@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ContactlessOrder.DAL.Entities.Users;
+using System;
 using System.Collections.Generic;
 
 namespace ContactlessOrder.DAL.Entities.Companies

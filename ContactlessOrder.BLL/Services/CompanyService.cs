@@ -303,6 +303,45 @@ namespace ContactlessOrder.BLL.Services
             await _companyRepository.SaveChanges();
         }
 
+        public async Task<PaymentDataDto> GetCompanyPaymentData(int userId)
+        {
+
+            var company = await _companyRepository.GetCompany(userId);
+
+            if (company != null)
+            {
+                var data = await _companyRepository.Get<PaymentData>(e => e.CompanyId == company.Id);
+
+                return data == null ? null : _mapper.Map<PaymentDataDto>(data);
+            }
+
+            return null;
+        }
+
+        public async Task UpdateCompanyPaymentData(int userId, PaymentDataDto dto)
+        {
+            var company = await _companyRepository.GetCompany(userId);
+
+            if (company != null)
+            {
+                var data = await _companyRepository.Get<PaymentData>(e => e.CompanyId == company.Id);
+
+                if (data != null)
+                {
+                    _mapper.Map(dto, data);
+                }
+                else
+                {
+                    data = _mapper.Map<PaymentData>(dto);
+                    data.CompanyId = company.Id;
+
+                    await _companyRepository.Add(data);
+                }
+
+                await _companyRepository.SaveChanges();
+            }
+        }
+
         private async Task<List<MenuItemPicture>> SavePictures(IEnumerable<IFormFile> files)
         {
             var pictures = new List<MenuItemPicture>();

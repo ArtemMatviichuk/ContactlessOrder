@@ -13,7 +13,11 @@ namespace ContactlessOrder.Common.Dto.Companies
 
         public DateTime RegisteredDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
+        public DateTime? ApprovedDate { get; set; }
 
         public int UserId { get; set; }
+        public int? ApprovedById { get; set; }
+        public string ApprovedByName { get; set; }
+        public int? PaymentDataId { get; set; }
     }
 }

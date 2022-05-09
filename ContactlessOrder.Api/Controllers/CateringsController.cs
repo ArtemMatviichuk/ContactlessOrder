@@ -4,9 +4,6 @@ using ContactlessOrder.Common.Dto.Caterings;
 using ContactlessOrder.Common.Dto.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -27,7 +24,7 @@ namespace ContactlessOrder.Api.Controllers
         [HttpGet("Menu")]
         public async Task<IActionResult> GetMenu()
         {
-            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.CateringId));
+            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.Id));
             var menu = await _cateringService.GetMenu(cateringId);
 
             return Ok(menu);
@@ -49,7 +46,7 @@ namespace ContactlessOrder.Api.Controllers
         [HttpGet("Orders")]
         public async Task<IActionResult> GetOrders()
         {
-            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.CateringId));
+            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.Id));
             var menu = await _cateringService.GetOrders(cateringId);
 
             return Ok(menu);
@@ -58,7 +55,7 @@ namespace ContactlessOrder.Api.Controllers
         [HttpGet("EndedOrders")]
         public async Task<IActionResult> GetEndedOrders()
         {
-            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.CateringId));
+            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.Id));
             var menu = await _cateringService.GetEndedOrders(cateringId);
 
             return Ok(menu);
@@ -67,7 +64,7 @@ namespace ContactlessOrder.Api.Controllers
         [HttpGet("Modifications")]
         public async Task<IActionResult> GetModifications()
         {
-            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.CateringId));
+            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.Id));
             var modifications = await _cateringService.GetModifications(cateringId);
 
             return Ok(modifications);
@@ -76,7 +73,7 @@ namespace ContactlessOrder.Api.Controllers
         [HttpPut("Modifications/{id}")]
         public async Task<IActionResult> UpdateModification(int id, [FromBody] UpdateCateringMenuOptionDto dto)
         {
-            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.CateringId));
+            int cateringId = int.Parse(User.FindFirstValue(TokenProperties.Id));
             await _cateringService.UpdateModification(id, cateringId, dto);
 
             return Ok();

@@ -66,11 +66,13 @@ namespace ContactlessOrder.Api
             services.AddTransient<IClientService, ClientService>();
             services.AddTransient<INotificationService, NotificationService>();
             services.AddTransient<ICommonService, CommonService>();
+            services.AddTransient<IAdminService, AdminService>();
 
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ICompanyRepository, CompanyRepository>();
             services.AddTransient<ICateringRepository, CateringRepository>();
             services.AddTransient<IClientRepository, ClientRepository>();
+            services.AddTransient<IAdminRepository, AdminRepository>();
 
             services.AddTransient<EmailHelper>();
             services.AddTransient<FileHelper>();

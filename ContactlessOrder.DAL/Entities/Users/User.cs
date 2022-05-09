@@ -19,6 +19,9 @@ namespace ContactlessOrder.DAL.Entities.Users
         public DateTime? ModifiedDate { get; set; }
         public DateTime? ExpireDate { get; set; }
 
+        public int RoleId { get; set; }
+        public Role Role { get; set; }
+
         public Company Company { get; set; }
     }
 }

@@ -74,6 +74,8 @@ namespace ContactlessOrder.BLL.Services
 
                 if (user == null)
                 {
+                    var role = await _repository.Get<Role>(e => e.Value == UserRoles.ClientValue);
+
                     user = new User()
                     {
                         Email = payload.Email,
@@ -84,10 +86,13 @@ namespace ContactlessOrder.BLL.Services
                         ProfilePhotoPath = payload.Picture,
                         RegistrationDate = DateTime.UtcNow,
                         EmailConfirmed = true,
+                        RoleId = role.Id,
                     };
 
                     await _repository.Add(user);
                     await _repository.SaveChanges();
+
+                    user.Role = role;
                 }
 
                 return new ResponseDto<string>() { Response = GenerateToken(user) };
@@ -123,13 +128,19 @@ namespace ContactlessOrder.BLL.Services
                 return new ResponseDto<string>() { ErrorMessage = error };
             }
 
+            var role = await _repository.Get<Role>(e => e.Value == UserRoles.ClientValue);
+
             var user = _mapper.Map<User>(dto);
+
+            user.RoleId = role.Id;
             user.RegistrationDate = DateTime.UtcNow;
             user.EmailConfirmed = false;
             user.PasswordHash = CryptoHelper.GetMd5Hash(dto.Password);
 
             await _repository.Add(user);
             await _repository.SaveChanges();
+
+            user.Role = role;
 
             await _emailHelper.SendConfirmEmail(user.Email, $"{user.FirstName} {user.LastName}", GenerateToken(user));
 
@@ -144,6 +155,8 @@ namespace ContactlessOrder.BLL.Services
                 return new ResponseDto<string>() { ErrorMessage = error };
             }
 
+            var role = await _repository.Get<Role>(e => e.Value == UserRoles.CompanyValue);
+
             var user = new User()
             {
                 FirstName = string.Empty,
@@ -153,6 +166,7 @@ namespace ContactlessOrder.BLL.Services
                 PhoneNumber = dto.PhoneNumber,
                 RegistrationDate = DateTime.UtcNow,
                 EmailConfirmed = false,
+                RoleId = role.Id,
                 Company = new Company()
                 {
                     Name = dto.Name,
@@ -161,6 +175,8 @@ namespace ContactlessOrder.BLL.Services
 
             await _repository.Add(user);
             await _repository.SaveChanges();
+
+            user.Role = role;
 
             await _emailHelper.SendConfirmEmail(user.Email, dto.Name, GenerateToken(user));
 
@@ -196,7 +212,8 @@ namespace ContactlessOrder.BLL.Services
                 new Claim(TokenProperties.Id, user.Id.ToString()),
                 new Claim(TokenProperties.Email, user.Email),
                 new Claim(TokenProperties.FullName, user.Company?.Name ?? $"{user.FirstName} {user.LastName}"),
-                new Claim(TokenProperties.CompanyId, user.Company == null ? string.Empty : user.Company.Id.ToString()),
+                new Claim(TokenProperties.Role, UserRoles.GetName(user.Role.Value)),
+                new Claim(TokenProperties.RoleValue, user.Role.Value.ToString()),
             };
 
             var tokenDescription = new SecurityTokenDescriptor
@@ -218,9 +235,11 @@ namespace ContactlessOrder.BLL.Services
 
             var claims = new List<Claim>
             {
-                new Claim(TokenProperties.CateringId, catering.Id.ToString()),
+                new Claim(TokenProperties.Id, catering.Id.ToString()),
                 new Claim(TokenProperties.Email, catering.Login),
                 new Claim(TokenProperties.FullName, catering.Name),
+                new Claim(TokenProperties.Role, UserRoles.CateringName),
+                new Claim(TokenProperties.RoleValue, UserRoles.CateringValue.ToString()),
             };
 
             var tokenDescription = new SecurityTokenDescriptor

@@ -7,10 +7,10 @@ namespace ContactlessOrder.Api.Hubs
     {
         public string GetUserId(HubConnectionContext connection)
         {
-            var cateringId = connection.User?.FindFirst(TokenProperties.CateringId)?.Value;
-            return cateringId != null
-                ? $"{NotificationConstants.CateringPrefix}{cateringId}"
-                : $"{NotificationConstants.UserPrefix}{connection.User?.FindFirst("Id")?.Value}";
+            var id = connection.User?.FindFirst(TokenProperties.Id)?.Value;
+            var role = connection.User?.FindFirst(TokenProperties.Role)?.Value;
+            
+            return $"{role}.{id}";
         }
     }
 }

@@ -29,6 +29,8 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Users
             builder.Property(e => e.ExpireDate)
                 .HasConversion(d => d, d => DateTime.SpecifyKind(d.Value, DateTimeKind.Utc));
 
+            builder.HasOne(e => e.Role).WithMany().HasForeignKey(e => e.RoleId).OnDelete(DeleteBehavior.Restrict);
+
             builder.HasData(new User()
             {
                 Id = -1,

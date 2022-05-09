@@ -305,7 +305,6 @@ namespace ContactlessOrder.BLL.Services
 
         public async Task<PaymentDataDto> GetCompanyPaymentData(int userId)
         {
-
             var company = await _companyRepository.GetCompany(userId);
 
             if (company != null)
@@ -337,6 +336,9 @@ namespace ContactlessOrder.BLL.Services
 
                     await _companyRepository.Add(data);
                 }
+
+                company.ApprovedDate = null;
+                company.ApprovedById = null;
 
                 await _companyRepository.SaveChanges();
             }

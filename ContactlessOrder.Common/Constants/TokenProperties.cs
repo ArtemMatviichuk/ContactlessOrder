@@ -5,7 +5,7 @@
         public const string Id = "Id";
         public const string Email = "Email";
         public const string FullName = "FullName";
-        public const string CompanyId = "CompanyId";
-        public const string CateringId = "CateringId";
+        public const string Role = "Role";
+        public const string RoleValue = "RoleValue";
     }
 }

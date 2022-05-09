@@ -19,6 +19,7 @@ namespace ContactlessOrder.DAL.Repositories
         {
             return await Context.Set<User>()
                 .Include(e => e.Company)
+                .Include(e => e.Role)
                 .FirstOrDefaultAsync(e => e.Email == email);
         }
     }

@@ -220,11 +220,16 @@ namespace ContactlessOrder.BLL.Services
 
         public async Task RejectOrder(int id, int userId)
         {
-            var order = await _cateringRepository.Get<Order>(id);
+            var order = await _clientRepository.GetOrder(id);
 
             if (order == null || order.UserId != userId)
             {
                 return;
+            }
+
+            if (order.PaymentMethod.Value == PaymentMethods.GooglePay)
+            {
+                await RevertPayment(order.PaymentNumber);
             }
 
             var status = await _cateringRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.RejectedStatusValue);
@@ -238,11 +243,17 @@ namespace ContactlessOrder.BLL.Services
 
         public async Task CompleteOrder(int id, int userId)
         {
-            var order = await _cateringRepository.Get<Order>(id);
+            var order = await _clientRepository.GetOrder(id);
 
             if (order == null || order.UserId != userId)
             {
                 return;
+            }
+
+            if (order.PaymentMethod.Value == PaymentMethods.GooglePay)
+            {
+                var companyId = order.Positions.First().Option.MenuOption.MenuItem.CompanyId;
+                await ProcessPayment(order.Id, companyId);
             }
 
             var status = await _cateringRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.DoneStatusValue);
@@ -275,6 +286,18 @@ namespace ContactlessOrder.BLL.Services
                 || (catering.Services ?? string.Empty).ToLower().Contains(lowerSearch)
                 || catering.MenuOptions.Select(e => e.MenuOption.MenuItem.Name?.ToLower()).Any(e => e.Contains(lowerSearch)))
                 .ToList();
+        }
+
+        private Task RevertPayment(string paymentNumber)
+        {
+            // revert payment with google pay
+            return Task.CompletedTask;
+        }
+
+        private Task ProcessPayment(int orderId, int companyId)
+        {
+            // process payment with company payment data
+            return Task.CompletedTask;
         }
     }
 }

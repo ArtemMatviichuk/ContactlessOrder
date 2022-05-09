@@ -5,6 +5,7 @@ using ContactlessOrder.DAL.Entities.Companies;
 using ContactlessOrder.DAL.Entities.Orders;
 using ContactlessOrder.DAL.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,6 +27,7 @@ namespace ContactlessOrder.DAL.Repositories
                 .Include(e => e.MenuOptions)
                 .ThenInclude(e => e.MenuOption.MenuItem)
                 .Where(e => e.Company.ApprovedDate.HasValue
+                    && (e.FullDay || e.OpenTime.Value < DateTime.Now.TimeOfDay && e.CloseTime.Value > DateTime.Now.TimeOfDay)
                     && e.Coordinates.Lat >= from.Lat && e.Coordinates.Lat <= to.Lat
                     && e.Coordinates.Lng >= from.Lng && e.Coordinates.Lng <= to.Lng)
                 .ToListAsync();

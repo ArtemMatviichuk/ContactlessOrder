@@ -67,12 +67,14 @@ namespace ContactlessOrder.Api
             services.AddTransient<INotificationService, NotificationService>();
             services.AddTransient<ICommonService, CommonService>();
             services.AddTransient<IAdminService, AdminService>();
+            services.AddTransient<ISupportService, SupportService>();
 
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ICompanyRepository, CompanyRepository>();
             services.AddTransient<ICateringRepository, CateringRepository>();
             services.AddTransient<IClientRepository, ClientRepository>();
             services.AddTransient<IAdminRepository, AdminRepository>();
+            services.AddTransient<ISupportRepository, SupportRepository>();
 
             services.AddTransient<EmailHelper>();
             services.AddTransient<FileHelper>();
@@ -209,6 +211,8 @@ namespace ContactlessOrder.Api
             {
                 c.MapControllers();
                 c.MapHub<OrdersHub>("/orders", opt => opt.Transports = HttpTransportType.WebSockets);
+                c.MapHub<SupportHub>("/support", opt => opt.Transports = HttpTransportType.WebSockets);
+                c.MapHub<AdminHub>("/admin", opt => opt.Transports = HttpTransportType.WebSockets);
             });
         }
     }

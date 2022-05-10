@@ -104,6 +104,15 @@ namespace ContactlessOrder.Api.Controllers
             return Ok();
         }
 
+        [HttpPost("Order/{id}/Complain")]
+        public async Task<IActionResult> ComplainOrder(int id, [FromBody] ValueDto<string> dto)
+        {
+            int userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            await _clientService.ComplainOrder(id, dto.Value, userId);
+
+            return Ok();
+        }
+
         [HttpGet("Order/{id}/TotalPrice")]
         public async Task<IActionResult> GetOrderTotalPrice(int id)
         {

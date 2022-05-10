@@ -24,18 +24,20 @@ namespace ContactlessOrder.BLL.Services
     {
         private readonly IValidationService _validationService;
         private readonly ICompanyRepository _companyRepository;
+        private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
         private readonly FileHelper _fileHelper;
         private readonly IConfiguration _configuration;
 
         public CompanyService(ICompanyRepository companyRepository, IMapper mapper,
-            FileHelper fileHelper, IConfiguration configuration, IValidationService validationService)
+            FileHelper fileHelper, IConfiguration configuration, IValidationService validationService, INotificationService notificationService)
         {
             _companyRepository = companyRepository;
             _mapper = mapper;
             _fileHelper = fileHelper;
             _configuration = configuration;
             _validationService = validationService;
+            _notificationService = notificationService;
         }
 
         public async Task<CompanyDto> GetCompany(int userId)
@@ -94,6 +96,8 @@ namespace ContactlessOrder.BLL.Services
             }
 
             await _companyRepository.SaveChanges();
+
+            await _notificationService.NotifyCompanyUpdated(userId);
 
             return string.Empty;
         }

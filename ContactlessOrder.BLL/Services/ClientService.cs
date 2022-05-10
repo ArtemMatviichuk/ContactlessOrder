@@ -16,6 +16,7 @@ using ContactlessOrder.BLL.HubConnections.HubClients;
 using ContactlessOrder.BLL.HubConnections.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using ContactlessOrder.Common.Dto.Caterings;
+using ContactlessOrder.DAL.Entities.Users;
 
 namespace ContactlessOrder.BLL.Services
 {
@@ -42,7 +43,7 @@ namespace ContactlessOrder.BLL.Services
         public async Task<IEnumerable<ClientCateringDto>> GetCaterings(GetCateringsDto dto, string search)
         {
             var caterings = await _clientRepository.GetCateringsByCoordinates(dto.From, dto.To);
-            
+
             if (!string.IsNullOrEmpty(search))
             {
                 caterings = DoFilter(caterings, search);
@@ -61,7 +62,7 @@ namespace ContactlessOrder.BLL.Services
             var dtos = menu.GroupBy(e => e.MenuOption.MenuItemId)
                 .Select(e => e.ToList())
                 .Select(e => new ClientMenuPositionDto()
-                { 
+                {
                     Name = e.FirstOrDefault().MenuOption.MenuItem.Name,
                     Description = e.FirstOrDefault().MenuOption.MenuItem.Description,
                     FirstPictureId = e.FirstOrDefault().MenuOption.MenuItem.Pictures.FirstOrDefault()?.Id,
@@ -152,10 +153,21 @@ namespace ContactlessOrder.BLL.Services
                 return new ResponseDto<int>() { ErrorMessage = "Досягнутий ліміт незавершених замовлень" };
             }
 
+            var user = await _clientRepository.Get<User>(userId);
+
+            if (user == null)
+            {
+                return new ResponseDto<int>() { ErrorMessage = "Користувач не знайдений" };
+            }
+            else if (user.IsBlocked)
+            {
+                return new ResponseDto<int>() { ErrorMessage = "Ви не можете створювати замовлення" };
+            }
+
             var status = await _clientRepository.Get<OrderStatus>(e => e.Value == OrderStatuses.CreatedStatusValue);
             var payment = await _clientRepository.Get<PaymentMethod>(e => e.Value == dto.PaymentMethodValue);
 
-            Order order = new ()
+            Order order = new()
             {
                 Comment = dto.Comment,
                 StatusId = status.Id,
@@ -263,6 +275,31 @@ namespace ContactlessOrder.BLL.Services
             await _cateringRepository.SaveChanges();
 
             await _notificationService.NotifyOrderCompleted(id, await _commonService.GetOrderTotalPrice(id, AppConstants.ViewAll));
+        }
+
+        public async Task ComplainOrder(int id, string value, int userId)
+        {
+            var order = await _clientRepository.GetOrder(id);
+
+            if (order != null)
+            {
+                var cateringId = order.Positions.First().Option.CateringId;
+
+                var complain = new Complain()
+                {
+                    OrderId = order.Id,
+                    CateringId = cateringId,
+                    UserId = userId,
+                    CreatedDate = DateTime.Now,
+                    Content = value,
+                    Status = ComplainStatus.New,
+                };
+
+                await _cateringRepository.Add(complain);
+                await _cateringRepository.SaveChanges();
+
+                await _notificationService.NotifyComplainAdded(complain.Id);
+            }
         }
 
         public Task<int> GetOrderTotalPrice(int id, int userId)

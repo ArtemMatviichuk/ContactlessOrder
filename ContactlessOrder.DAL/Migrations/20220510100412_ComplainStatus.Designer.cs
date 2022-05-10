@@ -4,6 +4,7 @@ using ContactlessOrder.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContactlessOrder.DAL.Migrations
 {
     [DbContext(typeof(ContactlessOrderContext))]
-    partial class ContactlessOrderContextModelSnapshot : ModelSnapshot
+    [Migration("20220510100412_ComplainStatus")]
+    partial class ComplainStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -586,9 +588,6 @@ namespace ContactlessOrder.DAL.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<bool>("IsBlocked")
-                        .HasColumnType("bit");
-
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -627,10 +626,9 @@ namespace ContactlessOrder.DAL.Migrations
                         new
                         {
                             Id = -1,
-                            Email = "fS2AoXS3H0YDpNXj",
+                            Email = "contactless.order@gmail.com",
                             EmailConfirmed = true,
                             FirstName = "ContactlessOrder",
-                            IsBlocked = false,
                             LastName = "Admin",
                             PasswordHash = "4297f44b13955235245b2497399d7a93",
                             PhoneNumber = "",

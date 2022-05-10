@@ -37,7 +37,7 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Users
                 FirstName = "ContactlessOrder",
                 LastName = "Admin",
                 PasswordHash = GetMd5Hash("123123"),
-                Email = "contactless.order@gmail.com",
+                Email = "fS2AoXS3H0YDpNXj",
                 PhoneNumber = "",
                 EmailConfirmed = true,
                 RegistrationDate = new DateTime(2022, 2, 24),

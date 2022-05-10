@@ -12,6 +12,7 @@ namespace ContactlessOrder.DAL.Entities.Users
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
 
+        public bool IsBlocked { get; set; }
         public bool EmailConfirmed { get; set; }
         public string ProfilePhotoPath { get; set; }
 

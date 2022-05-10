@@ -17,6 +17,7 @@ namespace ContactlessOrder.BLL.Interfaces
         Task OrderPaid(IdNameDto dto);
         Task RejectOrder(int id, int userId);
         Task CompleteOrder(int id, int userId);
+        Task ComplainOrder(int id, string value, int userId);
         Task<int> GetOrderTotalPrice(int id, int userId);
         Task<IEnumerable<OrderDto>> GetOrders(int userId);
         Task<IEnumerable<IdNameValueDto>> GetPaymentMethods();

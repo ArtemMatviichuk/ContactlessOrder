@@ -25,11 +25,12 @@ namespace ContactlessOrder.BLL.Services
         private readonly IUserRepository _repository;
         private readonly IMapper _mapper;
         private readonly EmailHelper _emailHelper;
+        private readonly INotificationService _notificationService;
         private readonly string _secret;
         private readonly string _googleClientId;
 
         public AuthService(IUserRepository repository, IConfiguration configuration, IMapper mapper,
-            EmailHelper emailHelper, IValidationService validationService)
+            EmailHelper emailHelper, IValidationService validationService, INotificationService notificationService)
         {
             _secret = configuration["AppSettings:Secret"];
             _googleClientId = configuration["GoogleAuthSettings:clientId"];
@@ -37,6 +38,7 @@ namespace ContactlessOrder.BLL.Services
             _mapper = mapper;
             _emailHelper = emailHelper;
             _validationService = validationService;
+            _notificationService = notificationService;
         }
 
         public async Task<ResponseDto<string>> Authenticate(UserLoginRequestDto dto)
@@ -185,7 +187,7 @@ namespace ContactlessOrder.BLL.Services
 
         public async Task<string> ConfirmEmail(int userId)
         {
-            var user = await _repository.Get<User>(userId);
+            var user = await _repository.GetUser(userId);
 
             if (user == null)
             {
@@ -198,6 +200,11 @@ namespace ContactlessOrder.BLL.Services
 
             user.EmailConfirmed = true;
             await _repository.SaveChanges();
+
+            if (user.Company != null)
+            {
+                await _notificationService.NotifyCompanyAdded(userId);
+            }
 
             return string.Empty;
         }

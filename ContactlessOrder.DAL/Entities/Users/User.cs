@@ -24,5 +24,6 @@ namespace ContactlessOrder.DAL.Entities.Users
         public Role Role { get; set; }
 
         public Company Company { get; set; }
+        public Catering Catering { get; set; }
     }
 }

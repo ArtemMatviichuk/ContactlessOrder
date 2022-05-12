@@ -8,13 +8,13 @@ namespace ContactlessOrder.BLL.Interfaces
 {
     public interface ICateringService
     {
-        Task<IEnumerable<CateringMenuOptionDto>> GetMenu(int cateringId);
+        Task<IEnumerable<CateringMenuOptionDto>> GetMenu(int userId);
         Task<string> UpdateMenuOption(int id, UpdateCateringMenuOptionDto dto);
-        Task<IEnumerable<OrderDto>> GetOrders(int cateringId);
-        Task<IEnumerable<OrderDto>> GetEndedOrders(int cateringId);
+        Task<IEnumerable<OrderDto>> GetOrders(int userId);
+        Task<IEnumerable<OrderDto>> GetEndedOrders(int userId);
 
-        Task<IEnumerable<CateringModificationDto>> GetModifications(int cateringId);
-        Task UpdateModification(int id, int cateringId, UpdateCateringMenuOptionDto dto);
+        Task<IEnumerable<CateringModificationDto>> GetModifications(int userId);
+        Task UpdateModification(int id, int userId, UpdateCateringMenuOptionDto dto);
         Task<IEnumerable<IdNameValueDto>> GetOrderStatuses();
         Task UpdateOrderStatus(int orderId, int statusId);
     }

@@ -48,19 +48,6 @@ namespace HE.Material.Api.Controllers
             return Ok(new { Token = response.Response });
         }
 
-        [HttpPost("Catering")]
-        public async Task<IActionResult> AuthenticateCatering(UserLoginRequestDto dto)
-        {
-            var response = await _authService.AuthenticateCatering(dto);
-
-            if (!string.IsNullOrEmpty(response.ErrorMessage))
-            {
-                return BadRequest(new { message = response.ErrorMessage });
-            }
-
-            return Ok(new { Token = response.Response });
-        }
-
         [HttpPost("Register")]
         public async Task<IActionResult> Register(UserRegisterRequestDto dto)
         {

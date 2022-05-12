@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
 using ContactlessOrder.BLL.Interfaces;
+using ContactlessOrder.Common.Constants;
 using ContactlessOrder.Common.Dto.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +28,8 @@ namespace HE.Material.Api.Controllers
         [HttpPut("Complains/{id}/Status")]
         public async Task<IActionResult> ChangeComplainStatus(int id, ValueDto<int> dto)
         {
-            await _supportService.ChangeComplainStatus(id, dto.Value);
+            var userId = int.Parse(User.FindFirstValue(TokenProperties.Id));
+            await _supportService.ChangeComplainStatus(id, dto.Value, userId);
             return Ok();
         }
     }

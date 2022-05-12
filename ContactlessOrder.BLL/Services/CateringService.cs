@@ -29,9 +29,10 @@ namespace ContactlessOrder.BLL.Services
             _notificationService = notificationService;
         }
 
-        public async Task<IEnumerable<CateringMenuOptionDto>> GetMenu(int cateringId)
+        public async Task<IEnumerable<CateringMenuOptionDto>> GetMenu(int userId)
         {
-            var menu = await _cateringRepository.GetMenu(cateringId);
+            var catering = await _cateringRepository.Get<Catering>(e => e.UserId == userId);
+            var menu = await _cateringRepository.GetMenu(catering.Id);
 
             var dtos = _mapper.Map<IEnumerable<CateringMenuOptionDto>>(menu);
 
@@ -55,32 +56,36 @@ namespace ContactlessOrder.BLL.Services
             return "Опція не знайдена";
         }
 
-        public async Task<IEnumerable<OrderDto>> GetOrders(int cateringId)
+        public async Task<IEnumerable<OrderDto>> GetOrders(int userId)
         {
-            var orders = await _cateringRepository.GetOrders(cateringId);
+            var catering = await _cateringRepository.Get<Catering>(e => e.UserId == userId);
+            var orders = await _cateringRepository.GetOrders(catering.Id);
 
             return await MapOrders(orders.Where(e => e.Status.Value != OrderStatuses.CreatedStatusValue
                     && e.Status.Value != OrderStatuses.RejectedStatusValue
                     && e.Status.Value != OrderStatuses.DoneStatusValue));
         }
 
-        public async Task<IEnumerable<OrderDto>> GetEndedOrders(int cateringId)
+        public async Task<IEnumerable<OrderDto>> GetEndedOrders(int userId)
         {
-            var orders = await _cateringRepository.GetOrders(cateringId);
+            var catering = await _cateringRepository.Get<Catering>(e => e.UserId == userId);
+            var orders = await _cateringRepository.GetOrders(catering.Id);
 
             return await MapOrders(orders.Where(e =>
                     e.Status.Value == OrderStatuses.RejectedStatusValue
                     || e.Status.Value == OrderStatuses.DoneStatusValue));
         }
 
-        public async Task<IEnumerable<CateringModificationDto>> GetModifications(int cateringId)
+        public async Task<IEnumerable<CateringModificationDto>> GetModifications(int userId)
         {
-            return await _commonService.GetCateringModifications(cateringId);
+            var catering = await _cateringRepository.Get<Catering>(e => e.UserId == userId);
+            return await _commonService.GetCateringModifications(catering.Id);
         }
 
-        public async Task UpdateModification(int id, int cateringId, UpdateCateringMenuOptionDto dto)
+        public async Task UpdateModification(int id, int userId, UpdateCateringMenuOptionDto dto)
         {
-            var modification = await _cateringRepository.Get<CateringModification>(e => e.CateringId == cateringId && e.ModificationId == id);
+            var catering = await _cateringRepository.Get<Catering>(e => e.UserId == userId);
+            var modification = await _cateringRepository.Get<CateringModification>(e => e.CateringId == catering.Id && e.ModificationId == id);
 
             if (modification != null)
             {
@@ -95,7 +100,7 @@ namespace ContactlessOrder.BLL.Services
                     Price = dto.Price,
                     Available = dto.Available,
                     InheritPrice = dto.InheritPrice,
-                    CateringId = cateringId,
+                    CateringId = catering.Id,
                     ModificationId = id,
                 };
 

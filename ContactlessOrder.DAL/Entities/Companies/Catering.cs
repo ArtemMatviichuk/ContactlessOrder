@@ -13,12 +13,11 @@ namespace ContactlessOrder.DAL.Entities.Companies
         public TimeSpan? OpenTime { get; set; }
         public TimeSpan? CloseTime { get; set; }
 
-        public string Login { get; set; }
-        public string PasswordHash { get; set; }
-
         public DateTime RegisteredDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
 
+        public int UserId { get; set; }
+        public User User { get; set; }
         public int CompanyId { get; set; }
         public Company Company { get; set; }
         public int? CoordinatesId { get; set; }

@@ -125,16 +125,27 @@ namespace ContactlessOrder.BLL.Services
                     catering.MenuOptions = dto.MenuIds.Select(e => new CateringMenuOption() { MenuOptionId = e, Available = true, InheritPrice = true }).ToList();
                 }
 
+                var role = await _companyRepository.Get<Role>(e => e.Value == UserRoles.CateringValue);
                 var password = CryptoHelper.GeneratePassword(16);
-                catering.Login = CryptoHelper.GeneratePassword(16);
-                catering.PasswordHash = CryptoHelper.GetMd5Hash(password);
+
+                catering.User = new User
+                {
+                    FirstName = string.Empty,
+                    LastName = string.Empty,
+                    PasswordHash = CryptoHelper.GetMd5Hash(password),
+                    Email = CryptoHelper.GeneratePassword(16),
+                    PhoneNumber = string.Empty,
+                    EmailConfirmed = true,
+                    RoleId = role.Id,
+                    RegistrationDate = DateTime.UtcNow,
+                };
 
                 await _companyRepository.Add(catering);
                 await _companyRepository.SaveChanges();
 
                 return new UserLoginRequestDto()
                 {
-                    Email = catering.Login,
+                    Email = catering.User.Email,
                     Password = password,
                 };
             }
@@ -168,8 +179,10 @@ namespace ContactlessOrder.BLL.Services
 
             if (catering != null)
             {
+                var user = await _companyRepository.Get<User>(catering.UserId);
+
                 var password = CryptoHelper.GeneratePassword(16);
-                catering.PasswordHash = CryptoHelper.GetMd5Hash(password);
+                user.PasswordHash = CryptoHelper.GetMd5Hash(password);
 
                 await _companyRepository.SaveChanges();
 

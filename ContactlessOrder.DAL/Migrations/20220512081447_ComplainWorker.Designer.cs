@@ -4,6 +4,7 @@ using ContactlessOrder.DAL.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ContactlessOrder.DAL.Migrations
 {
     [DbContext(typeof(ContactlessOrderContext))]
-    partial class ContactlessOrderContextModelSnapshot : ModelSnapshot
+    [Migration("20220512081447_ComplainWorker")]
+    partial class ComplainWorker
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,6 +44,9 @@ namespace ContactlessOrder.DAL.Migrations
                     b.Property<bool>("FullDay")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Login")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
@@ -53,14 +58,14 @@ namespace ContactlessOrder.DAL.Migrations
                     b.Property<TimeSpan?>("OpenTime")
                         .HasColumnType("time");
 
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("RegisteredDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Services")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -69,9 +74,6 @@ namespace ContactlessOrder.DAL.Migrations
                     b.HasIndex("CoordinatesId")
                         .IsUnique()
                         .HasFilter("[CoordinatesId] IS NOT NULL");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Caterings", (string)null);
                 });
@@ -659,17 +661,9 @@ namespace ContactlessOrder.DAL.Migrations
                         .WithOne("Catering")
                         .HasForeignKey("ContactlessOrder.DAL.Entities.Companies.Catering", "CoordinatesId");
 
-                    b.HasOne("ContactlessOrder.DAL.Entities.Users.User", "User")
-                        .WithOne("Catering")
-                        .HasForeignKey("ContactlessOrder.DAL.Entities.Companies.Catering", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Company");
 
                     b.Navigation("Coordinates");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Companies.CateringMenuOption", b =>
@@ -949,8 +943,6 @@ namespace ContactlessOrder.DAL.Migrations
 
             modelBuilder.Entity("ContactlessOrder.DAL.Entities.Users.User", b =>
                 {
-                    b.Navigation("Catering");
-
                     b.Navigation("Company");
                 });
 #pragma warning restore 612, 618

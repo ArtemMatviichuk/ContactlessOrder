@@ -2,17 +2,17 @@
 {
     public class UserRoles
     {
-        public const int CateringValue = -1;
         public const int AdminValue = 1;
         public const int SupportValue = 2;
         public const int CompanyValue = 3;
         public const int ClientValue = 4;
+        public const int CateringValue = 5;
 
-        public const string CateringName = "Catering";
         public const string AdminName = "Admin";
         public const string SupportName = "Support";
         public const string CompanyName = "Company";
         public const string ClientName = "Client";
+        public const string CateringName = "Catering";
 
         public static string GetName(int value)
         {

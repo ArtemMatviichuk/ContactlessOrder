@@ -11,6 +11,7 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Users
             builder.ToTable("Complains");
 
             builder.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.NoAction);
+            builder.HasOne(e => e.ModifiedBy).WithMany().HasForeignKey(e => e.ModifiedById).OnDelete(DeleteBehavior.NoAction);
             builder.HasOne(e => e.Catering).WithMany().HasForeignKey(e => e.CateringId).OnDelete(DeleteBehavior.SetNull);
             builder.HasOne(e => e.Order).WithMany().HasForeignKey(e => e.OrderId).OnDelete(DeleteBehavior.SetNull);
         }

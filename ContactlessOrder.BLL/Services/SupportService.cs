@@ -30,13 +30,16 @@ namespace ContactlessOrder.BLL.Services
             return dtos;
         }
 
-        public async Task ChangeComplainStatus(int id, int status)
+        public async Task ChangeComplainStatus(int id, int status, int userId)
         {
             var complain = await _supportRepository.Get<Complain>(id);
 
             if (complain != null)
             {
                 complain.Status = (ComplainStatus)status;
+                complain.ModifiedById = userId;
+                complain.ModifiedDate = System.DateTime.Now;
+
                 await _supportRepository.SaveChanges();
 
                 await _notificationService.NotifyComplainUpdated(id);

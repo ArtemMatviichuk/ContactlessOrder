@@ -25,6 +25,7 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Companies
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(e => e.Coordinates).WithOne(e => e.Catering);
+            builder.HasOne(e => e.User).WithOne(e => e.Catering).OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

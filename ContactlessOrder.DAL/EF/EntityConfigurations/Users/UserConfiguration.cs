@@ -26,36 +26,7 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Users
             builder.Property(e => e.ModifiedDate)
                 .HasConversion(d => d, d => DateTime.SpecifyKind(d.Value, DateTimeKind.Utc));
 
-            builder.Property(e => e.ExpireDate)
-                .HasConversion(d => d, d => DateTime.SpecifyKind(d.Value, DateTimeKind.Utc));
-
             builder.HasOne(e => e.Role).WithMany().HasForeignKey(e => e.RoleId).OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasData(new User()
-            {
-                Id = -1,
-                FirstName = "ContactlessOrder",
-                LastName = "Admin",
-                PasswordHash = GetMd5Hash("123123"),
-                Email = "fS2AoXS3H0YDpNXj",
-                PhoneNumber = "",
-                EmailConfirmed = true,
-                RegistrationDate = new DateTime(2022, 2, 24),
-            });
-        }
-
-        public static string GetMd5Hash(string input)
-        {
-            var md5Hash = MD5.Create();
-            byte[] data = md5Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
-            StringBuilder sBuilder = new StringBuilder();
-
-            for (int i = 0; i < data.Length; i++)
-            {
-                sBuilder.Append(data[i].ToString("x2"));
-            }
-
-            return sBuilder.ToString();
         }
     }
 }

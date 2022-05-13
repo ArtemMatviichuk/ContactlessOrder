@@ -13,9 +13,6 @@ namespace ContactlessOrder.DAL.EF.EntityConfigurations.Companies
 
             builder.Property(e => e.Name).IsRequired().HasMaxLength(250);
 
-            builder.Property(e => e.RegisteredDate)
-                .HasConversion(d => d, d => DateTime.SpecifyKind(d, DateTimeKind.Utc));
-
             builder.Property(e => e.ModifiedDate)
                 .HasConversion(d => d, d => DateTime.SpecifyKind(d.Value, DateTimeKind.Utc));
 

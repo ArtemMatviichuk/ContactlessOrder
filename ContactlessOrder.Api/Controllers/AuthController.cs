@@ -23,7 +23,7 @@ namespace HE.Material.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Authenticate(UserLoginRequestDto dto)
+        public async Task<IActionResult> Authenticate([FromBody] UserLoginRequestDto dto)
         {
             var response = await _authService.Authenticate(dto);
 
@@ -38,7 +38,7 @@ namespace HE.Material.Api.Controllers
         [HttpPost("GoogleLogin")]
         public async Task<IActionResult> GoogleAuthenticate(GoogleRegisterRequestDto dto)
         {
-            var response = await _authService.GoogleLogin(dto);
+            var response = await _authService.GoogleAuthenticate(dto);
 
             if (!string.IsNullOrEmpty(response.ErrorMessage))
             {

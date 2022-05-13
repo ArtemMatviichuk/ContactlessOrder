@@ -56,7 +56,7 @@ namespace ContactlessOrder.Api
                 });
 
             services.AddDbContext<ContactlessOrderContext>(options =>
-               options.UseSqlServer(Configuration.GetConnectionString("COLocal")));
+               options.UseSqlServer(Configuration.GetConnectionString(AppConstants.DBNameLocal)));
 
             services.AddTransient<IValidationService, ValidationService>();
             services.AddTransient<IAuthService, AuthService>();

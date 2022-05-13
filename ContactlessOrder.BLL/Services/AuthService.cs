@@ -62,7 +62,7 @@ namespace ContactlessOrder.BLL.Services
             return new ResponseDto<string>() { Response = GenerateToken(user) };
         }
 
-        public async Task<ResponseDto<string>> GoogleLogin(GoogleRegisterRequestDto dto)
+        public async Task<ResponseDto<string>> GoogleAuthenticate(GoogleRegisterRequestDto dto)
         {
             try
             {
@@ -113,9 +113,9 @@ namespace ContactlessOrder.BLL.Services
                 return new ResponseDto<string>() { ErrorMessage = error };
             }
 
-            var role = await _repository.Get<Role>(e => e.Value == UserRoles.ClientValue);
-
             var user = _mapper.Map<User>(dto);
+
+            var role = await _repository.Get<Role>(e => e.Value == UserRoles.ClientValue);
 
             user.RoleId = role.Id;
             user.RegistrationDate = DateTime.UtcNow;
@@ -201,7 +201,7 @@ namespace ContactlessOrder.BLL.Services
             {
                 new Claim(TokenProperties.Id, user.Id.ToString()),
                 new Claim(TokenProperties.Email, user.Email),
-                new Claim(TokenProperties.FullName, user.Company?.Name ?? $"{user.FirstName} {user.LastName}"),
+                new Claim(TokenProperties.FullName, GetUserName(user)),
                 new Claim(TokenProperties.Role, UserRoles.GetName(user.Role.Value)),
                 new Claim(TokenProperties.RoleValue, user.Role.Value.ToString()),
             };
@@ -216,6 +216,11 @@ namespace ContactlessOrder.BLL.Services
 
             var token = tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescription));
             return token;
+        }
+
+        private string GetUserName(User user)
+        {
+            return user.Company?.Name ?? user.Catering?.Name ?? $"{user.FirstName} {user.LastName}";
         }
     }
 }

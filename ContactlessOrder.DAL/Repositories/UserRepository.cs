@@ -19,6 +19,7 @@ namespace ContactlessOrder.DAL.Repositories
         {
             return await Context.Set<User>()
                 .Include(e => e.Company)
+                .Include(e => e.Catering)
                 .Include(e => e.Role)
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
@@ -27,6 +28,7 @@ namespace ContactlessOrder.DAL.Repositories
         {
             return await Context.Set<User>()
                 .Include(e => e.Company)
+                .Include(e => e.Catering)
                 .Include(e => e.Role)
                 .FirstOrDefaultAsync(e => e.Email == email
                     || (e.Email != null &&  e.Email.StartsWith($"{email}@")));

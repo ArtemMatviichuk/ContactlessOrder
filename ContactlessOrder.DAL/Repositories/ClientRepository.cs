@@ -42,6 +42,8 @@ namespace ContactlessOrder.DAL.Repositories
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Option.MenuOption.MenuItem.Pictures)
                 .Include(e => e.Positions)
+                .ThenInclude(e => e.Option.Catering.User)
+                .Include(e => e.Positions)
                 .ThenInclude(e => e.Modifications)
                 .ThenInclude(e => e.Modification)
                 .FirstOrDefaultAsync(e => e.Id == id);
@@ -55,6 +57,8 @@ namespace ContactlessOrder.DAL.Repositories
                 .Include(e => e.PaymentMethod)
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Option.MenuOption.MenuItem.Pictures)
+                .Include(e => e.Positions)
+                .ThenInclude(e => e.Option.Catering.User)
                 .Include(e => e.Positions)
                 .ThenInclude(e => e.Modifications)
                 .ThenInclude(e => e.Modification)

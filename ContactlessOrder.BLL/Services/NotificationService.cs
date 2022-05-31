@@ -44,7 +44,7 @@ namespace ContactlessOrder.BLL.Services
             dto.TotalPrice = totalPrice;
 
             await _ordersHub.Clients.User($"{UserRoles.ClientName}.{order.UserId}").OrderUpdated(dto);
-            await _ordersHub.Clients.User($"{UserRoles.CateringName}.{order.Positions.First().Option.CateringId}").OrderPaid(dto);
+            await _ordersHub.Clients.User($"{UserRoles.CateringName}.{order.Positions.First().Option.Catering.UserId}").OrderPaid(dto);
         }
 
         public async Task NotifyOrderUpdated(int id, int totalPrice)
@@ -54,7 +54,7 @@ namespace ContactlessOrder.BLL.Services
             dto.TotalPrice = totalPrice;
 
             await _ordersHub.Clients.User($"{UserRoles.ClientName}.{order.UserId}").OrderUpdated(dto);
-            await _ordersHub.Clients.User($"{UserRoles.CateringName}.{order.Positions.First().Option.CateringId}").OrderUpdated(dto);
+            await _ordersHub.Clients.User($"{UserRoles.CateringName}.{order.Positions.First().Option.Catering.UserId}").OrderUpdated(dto);
         }
 
         public async Task NotifyOrderReady(int id)
@@ -70,7 +70,7 @@ namespace ContactlessOrder.BLL.Services
             dto.TotalPrice = totalPrice;
 
             await _ordersHub.Clients.User($"{UserRoles.ClientName}.{order.UserId}").OrderUpdated(dto);
-            await _ordersHub.Clients.User($"{UserRoles.CateringName}.{order.Positions.First().Option.CateringId}").OrderRejected(dto);
+            await _ordersHub.Clients.User($"{UserRoles.CateringName}.{order.Positions.First().Option.Catering.UserId}").OrderRejected(dto);
         }
 
         public async Task NotifyOrderCompleted(int id, int totalPrice)
@@ -80,7 +80,7 @@ namespace ContactlessOrder.BLL.Services
             dto.TotalPrice = totalPrice;
 
             await _ordersHub.Clients.User($"{UserRoles.ClientName}.{order.UserId}").OrderUpdated(dto);
-            await _ordersHub.Clients.User($"{UserRoles.CateringName}.{order.Positions.First().Option.CateringId}").OrderCompleted(dto);
+            await _ordersHub.Clients.User($"{UserRoles.CateringName}.{order.Positions.First().Option.Catering.UserId}").OrderCompleted(dto);
         }
 
         public async Task NotifyComplainAdded(int id)
